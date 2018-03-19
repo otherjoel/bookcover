@@ -233,10 +233,10 @@
   (draw-pict pic (current-cover-dc) leftedge top-offset))
 
 (define (rounder num) (/ (round (* 1000 num)) 1000))
-(define (pts->inches pts) (format "~a″" (rounder (/ pts 72.0))))
-(define (pts->cm pts) (format "~acm" (rounder (* (/ pts 72.0) 2.54))))
+(define (pts->inches-string pts) (format "~a″" (rounder (/ pts 72.0))))
+(define (pts->cm-string pts) (format "~acm" (rounder (* (/ pts 72.0) 2.54))))
 
-(define (check-cover [unit-func pts->inches])
+(define (check-cover #:unit-display [unit-func pts->inches-string])
   (define interior-pagewidth-pts (unit-func (- (current-pagewidth-pts) (current-bleed-pts))))
   (define interior-pageheight-pts (unit-func (- (current-pageheight-pts) (* 2 (current-bleed-pts)))))
   (printf "Bleed:                ~a\n" (unit-func (current-bleed-pts)))
@@ -249,5 +249,4 @@
   (cond [(< (current-interior-pagecount) 101)
          (printf "CreateSpace would not allow text on spine (pages < 101)")]
         [(< (current-interior-pagecount) 130)
-         (printf "CreateSpace does not recommend text on spine (pages < 130)")])
-  )
+         (printf "CreateSpace does not recommend text on spine (pages < 130)")]))
