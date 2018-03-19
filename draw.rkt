@@ -89,8 +89,16 @@
   ; Draw something centered on the spine, with an optional top offset
   [spine-draw      (pict-convertible? real?       . -> . void?)]))
 
-; Just prints out a bunch of measurements and diagnostic stuff about the current cover.
-(provide check-cover)
+(provide
+ (contract-out
+  ; Format points as a string using inches or centimeters
+  [pts->inches-string (real? . -> . string?)]
+  [pts->cm-string     (real? . -> . string?)]
+
+  ; Just prints out a bunch of measurements and diagnostic stuff about the current cover.
+  [check-cover (->* () ; no required arguments
+                    (#:unit-display (real? . -> . string?)) ; optional func for formatting the pts as a string
+                    void?)]))
 
 ; End of provides!
 
