@@ -178,11 +178,11 @@
     (start-doc "useless string")
     (start-page)))
 
-(define (outline-spine [linecolor "black"])
+(define (outline-spine! [linecolor "black"])
   (draw-pict (colorize (linewidth 0.2 (linestyle 'dot (vline 1 (pageheight)))) linecolor) (current-cover-dc) (spineleftedge) 0)
   (draw-pict (colorize (linewidth 0.2 (linestyle 'dot (vline 1 (pageheight)))) linecolor) (current-cover-dc) (spinerightedge) 0))
 
-(define (outline-bleed [linecolor "black"])
+(define (outline-bleed! [linecolor "black"])
   (draw-pict (linewidth 0.2 (linestyle 'dot (colorize (rectangle (- (coverwidth) (* 2 (bleed))) (- (pageheight) (* 2 (bleed)))) linecolor)))
              (current-cover-dc)
              (bleed)
