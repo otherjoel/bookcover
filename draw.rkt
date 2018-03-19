@@ -5,30 +5,97 @@
 (provide (all-from-out racket/draw
                        pict))
 
-(provide setup
-         createspace-spine
-         using-ppi
-         current-cover-dc
-         finish-cover-dc)
+; Key function: prepares the pdf-dc% for the cover, and sets all parameters.
+; You will call this function at least once in every program that uses this package.
+(provide (contract-out
+          [setup (->*
+                  ; required arguments
+                  (#:interior-pdf path-string? 
+                   #:cover-pdf path-string?)
 
-(provide bleed
-         pagewidth
-         pageheight
-         spinewidth
-         coverwidth
-         spinerightedge
-         spineleftedge)
-(provide outline-spine
-         outline-bleed)
+                  ; optional arguments
+                  (#:bleed real?
+                   #:spine-calculator (exact-integer? . -> . real?))
 
-(provide centering-offset
-         cover-draw
-         frontcover-draw
-         backcover-draw
-         spine-draw
-         check-cover)
+                  ; return result
+                  void?)]))
+
+; Functions that return a function suitable for the #:spine-calculator argument for setup
+(provide
+ (contract-out
+  [createspace-spine ((symbols 'white-bw 'cream-bw 'color) . -> . (exact-integer? . -> . real?))]
+  [using-ppi         (real?                                . -> . (exact-integer? . -> . real?))]))
+
+(provide
+ (contract-out
+  ; Get the pdf-dc% for the current cover
+  [current-cover-dc (-> (is-a?/c pdf-dc%))]))
+
+; Close out the current cover PDF.
+; This is called automatically if your program uses #lang bookcover
+(provide finish-cover-dc)
+
+; Get coordinates/dimensions of various elements of the current cover
+; These have the current scaling already factored in so they can be used directly in drawing functions.
+(provide
+ (contract-out
+  [bleed          (-> real?)]
+  [pageheight     (-> real?)]
+  [pagewidth      (-> real?)]
+  [spinewidth     (-> real?)]
+  [coverwidth     (-> real?)]
+  [spinerightedge (-> real?)]
+  [spineleftedge  (-> real?)]))
+
+; Draw dashed lines on the cover showing the bleed and spine areas.
+; Optionally pass in a color to use for the line.
+(provide
+ (contract-out
+  [outline-spine! (() ((or/c string? (is-a?/c color%) (list/c byte? byte? byte?))) . ->* . void?)]
+  [outline-bleed! (() ((or/c string? (is-a?/c color%) (list/c byte? byte? byte?))) . ->* . void?)]))
+
+; Convenience functions for drawing on the cover using picts
+(provide
+ (contract-out
+  ; Generic helper, provides offset to center a pict within a given dimension
+  [centering-offset (->*
+                     ; required:
+                     (pict-convertible? ; the pict
+                      real?)            ; dimension within which to center
+                     ; optional:
+                     ((pict? . -> . real?)) ; function that will be called to get the dimension of the pict
+                     ; result:
+                     real?)]
+
+  ; Draw on the FRONT cover with centering or using coords relative to the front cover's top left
+  [frontcover-draw (->* (pict-convertible?)    ; required arguments
+                        (#:top real?           ; optional arguments
+                         #:left real?
+                         #:horiz-center any/c
+                         #:vert-center any/c)
+                        void?)]                ; return value
+
+  ; Draw on the BACK cover with centering or using coords relative to the back cover's top left
+  [backcover-draw  (->* (pict-convertible?)    ; required arguments
+                        (#:top real?           ; optional arguments
+                         #:left real?
+                         #:horiz-center any/c
+                         #:vert-center any/c)
+                        void?)]                ; return value
+
+  ; Draw anywhere on the cover
+  [cover-draw      (pict-convertible? real? real? . -> . void?)]
+
+  ; Draw something centered on the spine, with an optional top offset
+  [spine-draw      (pict-convertible? real?       . -> . void?)]))
+
+; Just prints out a bunch of measurements and diagnostic stuff about the current cover.
+(provide check-cover)
+
+; End of provides!
 
 (require pict
+         pict/convert
          racket/draw
          pdf-read)
 
