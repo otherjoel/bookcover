@@ -1,5 +1,9 @@
 .DS_Store
 *.rkt~
+*.scrbl~
 *.swp
 compiled/
 \#*.*
+scribblings/*.html
+scribblings/*.css
+scribblings/*.js
