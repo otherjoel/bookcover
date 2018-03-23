@@ -28,6 +28,16 @@
 
 (provide
  (contract-out
+  [inches->pts (real? . -> . real?)]
+  [cm->pts     (real? . -> . real?)]
+  [dummy-pdf   (->* (path-string?
+                     real?
+                     real?)
+                    (#:pages number?)
+                    void?)]))
+
+(provide
+ (contract-out
   ; Get the pdf-dc% for the current cover
   [current-cover-dc (-> (is-a?/c pdf-dc%))]))
 
@@ -184,6 +194,43 @@
 
   (for/last ([line (stop-after (in-port read-line pdf) has-media-box?)])
     (has-media-box? line)))
+
+; Convenience converters
+(define (inches->pts inches) (* inches 72.0))
+(define (cm->pts cm) (* cm 2.54 72.0))
+
+; Make a PDF for testing purposes
+(define (dummy-pdf filename width-pts height-pts #:pages [pages 1])
+  (define dummy-dc (new pdf-dc%
+                        [interactive #f]
+                        [as-eps #f]
+                        [use-paper-bbox #f]
+                        [width width-pts]
+                        [height height-pts]
+                        [output filename]))
+  (define t (text "JUST TESTING" "Arial" (round (/ width-pts 10))))
+  (define ctr-x (centering-offset t width-pts))
+  (define ctr-y (centering-offset t height-pts pict-height))
+  
+  (define (scrawl-testing)
+    (draw-pict t dummy-dc ctr-x ctr-y))
+
+  (send* dummy-dc
+    (start-doc "useless string")
+    (start-page))
+
+  (scrawl-testing)
+  
+  (unless (< pages 2)
+    (for ([n (in-range 1 pages)])
+      (send* dummy-dc
+        (end-page)
+        (start-page))
+      (scrawl-testing)))
+  
+  (send* dummy-dc
+    (end-page)
+    (end-doc)))
 
 (define (setup #:interior-pdf interior-pdf-filename
                #:cover-pdf cover-pdf-filename
