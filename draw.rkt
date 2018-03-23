@@ -131,10 +131,6 @@
 
 (define default-bleed-inches 0.125)
 
-(define (local-uri-string filename)
-  (string-append "file:"
-                 (path->string (build-path (current-directory) filename))))
-
 (define current-spinewidth-calculator (make-parameter (createspace-spine 'white-bw)))
 
 (define current-bleed-pts (make-parameter (* default-bleed-inches 72)))
