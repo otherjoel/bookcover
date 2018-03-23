@@ -164,8 +164,8 @@
   (define pdf (open-input-file pdf-filename))
   
   (for/sum ([line (in-port read-line pdf)])
-    (let ([x (regexp-match #px"/Type[\\s]*/Page[^s]" line)])
-      (if x (count values x) 0))))
+    (let ([x (regexp-match #px"/Type[\\s]*/Page(?:[^s]|$)" line)])
+      (if x (begin (print x) (count values x)) 0))))
 
 ; Look for occurences of the form "/MediaBox [0.0 0.0 612.0 792.0]"
 ; and return the box dimensions
