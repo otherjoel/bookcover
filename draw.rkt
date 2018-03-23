@@ -104,8 +104,7 @@
 
 (require pict
          pict/convert
-         racket/draw
-         pdf-read)
+         racket/draw)
 
 (define (createspace-spine paper-type)
   (define spine-multipliers
@@ -158,16 +157,43 @@
 (define (spineleftedge) (/ (current-spineleftedge-pts) (current-scaling)))
 (define (spinerightedge) (/ (current-spinerightedge-pts) (current-scaling)))
 
+; ~~~ Flaky PDF file info-getters - Not Provided ~~~
+
+; Get # of pages
+(define (page-count pdf-filename)
+  (define pdf (open-input-file pdf-filename))
+  
+  (for/sum ([line (in-port read-line pdf)])
+    (let ([x (regexp-match #px"/Type[\\s]*/Page[^s]" line)])
+      (if x (count values x) 0))))
+
+; Look for occurences of the form "/MediaBox [0.0 0.0 612.0 792.0]"
+; and return the box dimensions
+(define (has-media-box? str)
+  (define mediabox-px #px"/MediaBox\\s*\\[\\s*([0-9\\.])+\\s+([0-9\\.])+\\s+([0-9\\.]+)\\s+([0-9\\.]+)\\s*\\]")
+  (let* ([x (regexp-match mediabox-px str)])
+    (cond
+      [x
+       (match-let ([(list start-x start-y end-x end-y) (map string->number (rest x))])
+         (list (- end-x start-x) (- end-y start-y)))]
+      [else #f])))
+
+; Find the first MediaBox in a PDF and call that the page size (works most of the time)
+(define (page-size pdf-filename)
+  (define pdf (open-input-file pdf-filename))
+
+  (for/last ([line (stop-after (in-port read-line pdf) has-media-box?)])
+    (has-media-box? line)))
+
 (define (setup #:interior-pdf interior-pdf-filename
                #:cover-pdf cover-pdf-filename
                #:bleed [bleed-pts (current-bleed-pts)]
                #:spine-calculator [spinewidth-calc (createspace-spine 'white-bw)])
 
   ; Pull information out of the interior PDF and set parameters
-  (define intpdf (open-pdf-uri (local-uri-string interior-pdf-filename) #f))
   (match-define (list interior-width-pts interior-height-pts)
-    (page-size intpdf))
-  (current-interior-pagecount (pdf-count-pages intpdf))
+    (page-size interior-pdf-filename))
+  (current-interior-pagecount (page-count interior-pdf-filename))
   (current-pagewidth-pts  (+ interior-width-pts (current-bleed-pts)))
   (current-pageheight-pts (+ interior-height-pts (* 2 (current-bleed-pts))))
 
