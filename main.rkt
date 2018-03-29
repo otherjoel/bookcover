@@ -16,14 +16,9 @@
   bookcover)
 
 (define-macro-cases bookcover-begin
-  [(bookcover-begin (setup SETUP-ARGS ...) EXPRESSIONS ...)
-   #'(#%module-begin
-      (setup SETUP-ARGS ...)
-      EXPRESSIONS ...
-      (finish-cover-dc))]
   [(bookcover-begin EXPRESSIONS ...)
    #'(#%module-begin
-      (println "No setup?!?!?")
-      EXPRESSIONS ...)])
+      EXPRESSIONS ...
+      (finish-cover-dc))])
 
 
