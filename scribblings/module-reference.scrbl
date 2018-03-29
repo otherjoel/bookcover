@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require (for-label racket bookcover/draw racket/draw pict))
+@(require (for-label racket bookcover/draw racket/draw pict pict/convert))
 
 @title{Module Reference}
 
@@ -45,9 +45,65 @@ Different printers specify different ways of calculating the spine width of your
 
  Use this if your printing service instructs you to calculate spine width using a PPI value for a particular paper type.}
 
+@section{Measurement functions}
+
+@deftogether[(@defproc[(bleed) real?]
+              @defproc[(pageheight) real?]
+              @defproc[(pagewidth) real?]
+              @defproc[(spinewidth) real?]
+              @defproc[(coverwidth) real?])]{
+Return the actual measurement of the element on the @racket[current-cover-dc], already divided by the scaling factor.
+
+The @racket[pagewidth], @racket[pageheight] and @racket[coverwidth] functions each include the width of the bleed on all applicable sides:
+
+@itemlist[
+  @item{The @racket[pagewidth] includes the width of the bleed along @bold{one} edge (i.e. the right edge for the front cover, the left edge for the back cover).}
+  @item{The @racket[coverwidth] and @racket[pageheight] include the width of the bleed along @bold{two} edges (top and bottom for height, left and right for width).}
+]}
+
+@deftogether[(@defproc[(spinerightedge) real?]
+              @defproc[(spineleftedge) real?])]{
+Returns the coordinates of the spine's left or right edge on the @racket[current-cover-dc], already divided by the scaling factor.
+
+These would be most commonly used when placing elements with reference to the back cover's right edge or the front cover's left edge.}
+
+@defproc[(centering-offset [pic pict-convertible?]
+                           [context-dim real?]
+                           [dim-func (pict? . -> . real?) pict-width])
+          real?]{
+Returns an offset that, when used as an x- or y-offset for @racket[pic], would exactly center it within @racket[context-dim].
+
+If centering vertically, use @racket[pict-height] as the last argument.
+}
+
 @section{Drawing functions}
 
 @deftogether[(
  @defproc[(outline-spine! [#:color color (or/c string? (is-a?/c color%) (list/c byte? byte? byte?)) "black"]) void?]
  @defproc[(outline-bleed! [#:color color (or/c string? (is-a?/c color%) (list/c byte? byte? byte?)) "black"]) void?])]{
  Draw an outline of the spine or bleed areas, respectively, on the cover, using a dashed line colored with @racket[color].}
+
+@defproc[(cover-draw [pic pict-convertible?] [x real?] [y real?]) void?]{Draw @racket[pic] on the current cover, with its top left corner at @racket[x], @racket[y].}
+
+@deftogether[(
+  @defproc[(frontcover-draw [pic pict-convertible?]
+                            [#:top top real? 0]
+                            [#:left left real? 0]
+                            [#:horiz-center hcenter any/c #f]
+                            [#:vert-center  vcenter any/c #f]) void?]
+   @defproc[(backcover-draw [pic pict-convertible?]
+                            [#:top top real? 0]
+                            [#:left left real? 0]
+                            [#:horiz-center hcenter any/c #f]
+                            [#:vert-center  vcenter any/c #f]) void?])]{
+Draw @racket[pic] on the front or back cover.
+     
+When @racket[hcenter] is @racket[#t], @racket[left] is ignored; Likewise when @racket[vcenter] is @racket[#t], @racket[top] is ignored.
+
+ The @racket[#:top] and @racket[#:left] arguments should @emph{not} include the bleed area --- i.e., a value of @racket[0] for either of these coordinates will place @racket[pic] at the very inside edge of the bleed.}
+
+@defproc[(spine-draw [pic pict-convertible?]
+                     [top-offset real? 0]) void?]{
+Draw @racket[pic] horizontally centered on the spine, optionally offset from the top of the spine by @racket[top-offset].
+
+By design, this function does not check or care if @racket[pic] will fit inside the spine width.}
