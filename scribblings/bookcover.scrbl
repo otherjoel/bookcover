@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require (for-label pollen))
+@(require (for-label bookcover/draw racket))
 
 @title{bookcover: generating PDFs for book covers}
 @author[(author+email "Joel Dueck" "joel@jdueck.net" #:obfuscate? #t)]
@@ -10,11 +10,11 @@
 
 Creating a digital cover for a printed book can be one of the most tedious parts of self-publishing. Printers and publishers have strict requirements and formulas you must use to calculate the cover's dimensions. You need to calculate the width of the book's spine based on page count and paper type, add space for bleed, and so forth. If you change @emph{anything} about your book --- even just adding a page or two --- you'll need to start all over again.
 
-Instead of building your cover with a GUI in a program like InDesign or Photoshop, you can now create your book cover as a Racket program that does all the calculation for you and generates the cover in PDF form. This has a couple of advantages:
+Instead of building your cover with a GUI in a program like InDesign or Photoshop, you can create your book cover as a Racket program that does all the calculation for you and generates the cover in PDF form. This has a couple of advantages:
 
 @itemlist[
- @item{If your book's interior page count changes, you can re-run the program and your cover will be adjusted automatically.}
- @item{You can keep your book's cover under version control and track changes more easily (useful when @racketlink[pollen]{the book itself is also a program}).}
+ @item{If your book's page count changes, you can re-run the program and your cover will be adjusted automatically.}
+ @item{You can keep your book's cover under version control and track changes more easily (useful when @link["http://pollenpub.com"]{the book itself is also a program}).}
  @item{Your book cover has access to a complete programming environment. Whether it's getting values from a SQL database or using procedurally generated fractal art: if it can be done with code, it can be very easily placed on your book's cover.}
 ]
 
