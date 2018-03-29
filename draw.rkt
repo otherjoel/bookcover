@@ -97,7 +97,7 @@
   [cover-draw      (pict-convertible? real? real? . -> . void?)]
 
   ; Draw something centered on the spine, with an optional top offset
-  [spine-draw      (pict-convertible? real?       . -> . void?)]))
+  [spine-draw      (->* (pict-convertible?) (real?) void?)]))
 
 (provide
  (contract-out
