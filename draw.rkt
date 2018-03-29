@@ -14,8 +14,8 @@
                    #:cover-pdf path-string?)
 
                   ; optional arguments
-                  (#:bleed real?
-                   #:spine-calculator (exact-integer? . -> . real?))
+                  (#:bleed-pts real?
+                   #:spine-calculator (exact-positive-integer? . -> . real?))
 
                   ; return result
                   void?)]))
@@ -23,8 +23,8 @@
 ; Functions that return a function suitable for the #:spine-calculator argument for setup
 (provide
  (contract-out
-  [createspace-spine ((symbols 'white-bw 'cream-bw 'color) . -> . (exact-integer? . -> . real?))]
-  [using-ppi         (real?                                . -> . (exact-integer? . -> . real?))]))
+  [createspace-spine ((or/c 'white-bw 'cream-bw 'color) . -> . (exact-positive-integer? . -> . real?))]
+  [using-ppi         (real?                             . -> . (exact-positive-integer? . -> . real?))]))
 
 (provide
  (contract-out
@@ -33,13 +33,13 @@
   [dummy-pdf   (->* (path-string?
                      real?
                      real?)
-                    (#:pages number?)
+                    (#:pages exact-positive-integer?)
                     void?)]))
 
 (provide
  (contract-out
   ; Get the pdf-dc% for the current cover
-  [current-cover-dc (-> (is-a?/c pdf-dc%))]))
+  [current-cover-dc (-> (or/c null? (is-a?/c pdf-dc%)))]))
 
 ; Close out the current cover PDF.
 ; This is called automatically if your program uses #lang bookcover
@@ -171,7 +171,7 @@
   
   (for/sum ([line (in-port read-line pdf)])
     (let ([x (regexp-match #px"/Type[\\s]*/Page(?:[^s]|$)" line)])
-      (if x (begin (print x) (count values x)) 0))))
+      (if x (begin #|(print x)|# (count values x)) 0))))
 
 ; Look for occurences of the form "/MediaBox [0.0 0.0 612.0 792.0]"
 ; and return the box dimensions
@@ -230,7 +230,7 @@
 
 (define (setup #:interior-pdf interior-pdf-filename
                #:cover-pdf cover-pdf-filename
-               #:bleed [bleed-pts (current-bleed-pts)]
+               #:bleed-pts [bleed-pts (current-bleed-pts)]
                #:spine-calculator [spinewidth-calc (createspace-spine 'white-bw)])
 
   ; Pull information out of the interior PDF and set parameters
