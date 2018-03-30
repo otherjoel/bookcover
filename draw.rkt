@@ -261,7 +261,7 @@
   (draw-pict spineline (current-cover-dc) (spinerightedge) 0))
 
 (define (outline-bleed! [linecolor "black"])
-  (define rect (rectangle (- (coverwidth) (* 2 (bleed))) (- (pageheight) (* 2 (bleed))))
+  (define rect (rectangle (- (coverwidth) (* 2 (bleed))) (- (pageheight) (* 2 (bleed)))))
   (draw-pict (linewidth 0.2 (linestyle 'dot (colorize rect linecolor)))
              (current-cover-dc)
              (bleed)
