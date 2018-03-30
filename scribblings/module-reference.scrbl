@@ -107,3 +107,26 @@ When @racket[hcenter] is @racket[#t], @racket[left] is ignored; Likewise when @r
 Draw @racket[pic] horizontally centered on the spine, optionally offset from the top of the spine by @racket[top-offset].
 
 By design, this function does not check or care if @racket[pic] will fit inside the spine width.}
+
+@section{Testing}
+
+@defproc[(dummy-pdf [output-pdf path-string?]
+                    [width-pts real?]
+                    [height-pts real?]
+                    [#:pages page-count exact-positive-integer? 1]) void?]{
+Creates a PDF with @racket[page-count] pages using the given dimensions and saves it to @racket[output-pdf]. The width and height are given in @tech{points}.
+
+This PDF can be useful for mocking up a cover if you don't yet have a PDF of your book's interior to pass to the @racket[setup] function, or for rapidly experimenting with different paper sizes.}
+
+@defproc[(check-cover [#:unit-display unit-func (real? . -> . string?) pts->inches-string]) void?]{
+  Prints out a bunch of information about the current bleed, interior PDF page size, spine width calculation and cover size. Dimensions are formatted using @racket[unit-func].}
+
+@section{Unit conversions}
+
+@deftogether[(@defproc[(pts->inches-string [points real?]) string?]
+              @defproc[(pts->cm-string [points real?]) string?])]{
+Convert @tech{points} to inches or centimeters, respectively, in string form with the unit appended. Included for use with @racket[check-cover], though perhaps you will find other uses for them.}
+
+@deftogether[(@defproc[(inches->pts [inches real?]) real?]
+              @defproc[(cm->pts [cm real?]) real?])]{
+Convert @racket[inches] and @racket[cm] to @tech{points}, respectively. Created mainly for convenience with @racket[dummy-pdf].}
