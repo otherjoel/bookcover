@@ -19,6 +19,6 @@
   [(bookcover-begin EXPRESSIONS ...)
    #'(#%module-begin
       EXPRESSIONS ...
-      (finish-cover-dc))])
+      (finish-cover))])
 
 

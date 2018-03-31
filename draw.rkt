@@ -43,7 +43,7 @@
 
 ; Close out the current cover PDF.
 ; This is called automatically if your program uses #lang bookcover
-(provide finish-cover-dc)
+(provide finish-cover)
 
 ; Get coordinates/dimensions of various elements of the current cover
 ; These have the current scaling already factored in so they can be used directly in drawing functions.
@@ -170,8 +170,8 @@
   (define pdf (open-input-file pdf-filename))
   
   (for/sum ([line (in-port read-line pdf)])
-    (let ([x (regexp-match #px"/Type[\\s]*/Page(?:[^s]|$)" line)])
-      (if x (begin #|(print x)|# (count values x)) 0))))
+           (let ([x (regexp-match #px"/Type[\\s]*/Page(?:[^s]|$)" line)])
+             (if x (begin #|(print x)|# (count values x)) 0))))
 
 ; Look for occurences of the form "/MediaBox [0.0 0.0 612.0 792.0]"
 ; and return the box dimensions
@@ -189,7 +189,7 @@
   (define pdf (open-input-file pdf-filename))
 
   (for/last ([line (stop-after (in-port read-line pdf) has-media-box?)])
-    (has-media-box? line)))
+            (has-media-box? line)))
 
 ; Convenience converters
 (define (inches->pts inches) (* inches 72.0))
@@ -219,10 +219,10 @@
   
   (unless (< pages 2)
     (for ([n (in-range 1 pages)])
-      (send* dummy-dc
-        (end-page)
-        (start-page))
-      (scrawl-testing)))
+         (send* dummy-dc
+           (end-page)
+           (start-page))
+         (scrawl-testing)))
   
   (send* dummy-dc
     (end-page)
@@ -267,10 +267,11 @@
              (bleed)
              (bleed)))
   
-(define (finish-cover-dc)
-  (send* (current-cover-dc)
-    (end-page)
-    (end-doc)))
+(define (finish-cover)
+  (unless (null? (current-cover-dc))
+    (send* (current-cover-dc)
+      (end-page)
+      (end-doc))))
 
 ; Returns an offset that will center pic within a given length.
 (define (centering-offset pic context-dim [dim-func pict-width])
