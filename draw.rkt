@@ -122,12 +122,12 @@
           'cream-bw 0.002500
           'color    0.002347))
   (cond [(member paper-type (hash-keys spine-multipliers))
-         (lambda (pages) (* pages (hash-ref spine-multipliers paper-type)))]
+         (lambda (pages) (* pages (hash-ref spine-multipliers paper-type) 72.0))]
         [else
          (raise-argument-error 'paper-type (format "one of: ~a" (hash-keys spine-multipliers)) paper-type)]))
          
 (define (using-ppi pages-per-inch)
-  (lambda (pages) (* pages (/ 1 pages-per-inch))))
+  (lambda (pages) (* pages (/ 1 pages-per-inch) 72.0)))
 
 (define default-bleed-inches 0.125)
 
@@ -241,7 +241,7 @@
   (current-pageheight-pts (+ interior-height-pts (* 2 (current-bleed-pts))))
 
   (current-spinewidth-calculator spinewidth-calc)
-  (current-spinewidth-pts (* (spinewidth-calc (current-interior-pagecount)) 72))
+  (current-spinewidth-pts (spinewidth-calc (current-interior-pagecount)))
   
   (current-coverwidth-pts (+ (* (current-pagewidth-pts) 2) (current-spinewidth-pts)))
 
