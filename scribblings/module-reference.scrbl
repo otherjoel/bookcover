@@ -202,15 +202,6 @@ This PDF can be useful for mocking up a cover if you don't yet have a PDF of you
 
 @section{Unit conversions}
 
-@deftogether[(@defproc[(pts->inches-string [points real?]) string?]
-              @defproc[(pts->cm-string [points real?]) string?])]{
-Convert @tech{points} to inches or centimeters, respectively, in string form with the unit appended. Included for use with @racket[check-cover], though perhaps you will find other uses for them.
-@examples[#:eval codebox
-          (pts->inches-string 72)
-          (pts->cm-string 72)
-]
-}
-
 @deftogether[(@defproc[(inches->pts [inches real?]) real?]
               @defproc[(cm->pts [cm real?]) real?])]{
 Convert @racket[inches] and @racket[cm] to @tech{points}, respectively. Created mainly for convenience with @racket[setup] and @racket[dummy-pdf].
@@ -218,5 +209,14 @@ Convert @racket[inches] and @racket[cm] to @tech{points}, respectively. Created 
 @examples[#:eval codebox
           (inches->pts 1)
           (cm->pts 1)
+]
+}
+
+@deftogether[(@defproc[(pts->inches-string [points real?]) string?]
+              @defproc[(pts->cm-string [points real?]) string?])]{
+Convert @tech{points} to inches or centimeters, respectively, in string form with the unit appended. Included for use with @racket[check-cover], though perhaps you will find other uses for them.
+@examples[#:eval codebox
+          (pts->inches-string 72)
+          (pts->cm-string 72)
 ]
 }
