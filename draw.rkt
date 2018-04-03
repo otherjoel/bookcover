@@ -193,7 +193,7 @@
 
 ; Convenience converters
 (define (inches->pts inches) (* inches 72.0))
-(define (cm->pts cm) (* cm 2.54 72.0))
+(define (cm->pts cm) (* (/ cm 2.54) 72.0))
 
 ; Make a PDF for testing purposes
 (define (dummy-pdf filename width-pts height-pts #:pages [pages 1])
