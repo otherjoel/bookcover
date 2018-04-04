@@ -11,8 +11,8 @@
                                    #:draw-border? #f))
 
 (cover-draw accent 0 (/ (pageheight) 3))
-(frontcover-draw title #:top (* (pageheight) 2/6) #:horiz-center #t)
-(frontcover-draw subtitle #:top (* (pageheight) 3/6) #:horiz-center #t)
+(frontcover-draw title #:top (* (pageheight) 2/6) #:horiz-center? #t)
+(frontcover-draw subtitle #:top (* (pageheight) 3/6) #:horiz-center? #t)
 
 (outline-spine! "red")
 (outline-bleed!)

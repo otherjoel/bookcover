@@ -100,14 +100,14 @@ Different printers specify different ways of calculating the spine width of your
   @defproc[(frontcover-draw [pic pict-convertible?]
                             [#:top top real? 0]
                             [#:left left real? 0]
-                            [#:horiz-center hcenter any/c #f]
-                            [#:vert-center  vcenter any/c #f]) void?]
+                            [#:horiz-center? hcenter any/c #f]
+                            [#:vert-center?  vcenter any/c #f]) void?]
    @defproc[(backcover-draw [pic pict-convertible?]
                             [#:top top real? 0]
                             [#:left left real? 0]
-                            [#:horiz-center hcenter any/c #f]
-                            [#:vert-center  vcenter any/c #f]) void?])]{
-Draw @racket[pic] on the "front" or "back" regions cover, using coordinates and centering relative to the respective region.
+                            [#:horiz-center? hcenter any/c #f]
+                            [#:vert-center?  vcenter any/c #f]) void?])]{
+Draw @racket[pic] on the ``front'' or ``back'' regions cover, using coordinates and centering relative to the respective region.
 
 @codeblock{
 ; These two lines do exactly the same thing:
@@ -115,7 +115,7 @@ Draw @racket[pic] on the "front" or "back" regions cover, using coordinates and 
 (backcover-draw pic)
 
 ; These two lines also do exactly the same thing:
-(cover-draw pic #:left (spinerightedge))
+(cover-draw pic (spinerightedge) 0)
 (frontcover-draw pic)
 }
      

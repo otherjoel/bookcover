@@ -81,16 +81,16 @@
   [frontcover-draw (->* (pict-convertible?)    ; required arguments
                         (#:top real?           ; optional arguments
                          #:left real?
-                         #:horiz-center any/c
-                         #:vert-center any/c)
+                         #:horiz-center? any/c
+                         #:vert-center? any/c)
                         void?)]                ; return value
 
   ; Draw on the BACK cover with centering or using coords relative to the back cover's top left
   [backcover-draw  (->* (pict-convertible?)    ; required arguments
                         (#:top real?           ; optional arguments
                          #:left real?
-                         #:horiz-center any/c
-                         #:vert-center any/c)
+                         #:horiz-center? any/c
+                         #:vert-center? any/c)
                         void?)]                ; return value
 
   ; Draw anywhere on the cover
@@ -280,8 +280,8 @@
 (define (frontcover-draw pic
                          #:top [y 0]
                          #:left [x 0]
-                         #:horiz-center [hcenter #f]
-                         #:vert-center [vcenter #f])
+                         #:horiz-center? [hcenter #f]
+                         #:vert-center? [vcenter #f])
   (define top-offset
     (cond [vcenter (/ (- (pageheight) (pict-height pic)) 2)]
           [else (+ (bleed) y)]))
@@ -294,8 +294,8 @@
 (define (backcover-draw pic
                         #:top [x 0]
                         #:left [y 0]
-                        #:horiz-center [hcenter #f]
-                        #:vert-center [vcenter #f])
+                        #:horiz-center? [hcenter #f]
+                        #:vert-center? [vcenter #f])
   (define top-offset
     (cond [vcenter (/ (- (pageheight) (pict-height pic)) 2)]
           [else (+ (bleed) y)]))
