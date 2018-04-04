@@ -39,10 +39,9 @@ Examples:
 
  ; Using more options:
  (setup #:interior-pdf "my-book-contents.pdf"
-                    #:cover-pdf "cover.pdf"
-                    #:spinewidth-calc (using-ppi 339) ; Calculate spine width using 339 PPI
-                    #:bleed-pts (inches->pts 0.25))   ; Use 1/4" bleed
-                    
+        #:cover-pdf "cover.pdf"
+        #:spinewidth-calc (using-ppi 339) ; Calculate spine width using 339 PPI
+        #:bleed-pts (inches->pts 0.25))   ; Use 1/4" bleed                    
  }
 }
 
@@ -55,6 +54,8 @@ If @racket[setup] has not yet been called since the start of the program, or if 
 @defproc[(finish-cover) void?]{
   Properly closes the @racket[pdf-dc%] for the current book cover, sets @racket[current-cover-dc] to null, and zeroes out the return values of all the @secref["measurement-functions"].
 
+If @racket[current-cover-dc] is already null, calling this function has no effect.
+                      
 This function is automatically called at the very end of your program when using @code{#lang bookcover}.
 
 It is also called automatically on successive calls to @racket[setup] whenever @racket[current-cover-dc] is not equal to @racket[null].}
@@ -93,7 +94,7 @@ Different printers specify different ways of calculating the spine width of your
 
 @section{Drawing functions}
 
-@defproc[(cover-draw [pic pict-convertible?] [x real?] [y real?]) void?]{Draw @racket[pic] on the current cover, with its top left corner at @racket[x], @racket[y]. The @racket[0] coordinates for @racket[x] and @racket[y] start on the very outside edge of the bleed.}
+@defproc[(cover-draw [pic pict-convertible?] [x real?] [y real?]) void?]{Draw @racket[pic] on the current cover, with its top left corner at @racket[x], @racket[y]. The @racket[0] coordinates for @racket[x] and @racket[y] start on the very outside edge of the @tech{bleed}.}
 
 @deftogether[(
   @defproc[(frontcover-draw [pic pict-convertible?]
@@ -106,7 +107,19 @@ Different printers specify different ways of calculating the spine width of your
                             [#:left left real? 0]
                             [#:horiz-center hcenter any/c #f]
                             [#:vert-center  vcenter any/c #f]) void?])]{
-Draw @racket[pic] on the front or back cover. The @racket[0] coordinates for the @racket[#:top] and @racket[#:left] arguments start at the very outside edge of the bleed.
+Draw @racket[pic] on the "front" or "back" regions cover, using coordinates and centering relative to the respective region.
+
+@codeblock{
+; These two lines do exactly the same thing:
+(cover-draw pic 0 0)
+(backcover-draw pic)
+
+; These two lines also do exactly the same thing:
+(cover-draw pic #:left (spinerightedge))
+(frontcover-draw pic)
+}
+     
+The @racket[0] coordinates for the @racket[#:top] and @racket[#:left] arguments start at the very outside edge of the @tech{bleed}.
      
 When @racket[hcenter] is @racket[#t], @racket[left] is ignored; likewise when @racket[vcenter] is @racket[#t], @racket[top] is ignored.}
 
@@ -200,7 +213,7 @@ This PDF can be useful for mocking up a cover if you don't yet have a PDF of you
 (check-cover)
 ]}
 
-@section{Unit conversions}
+@section[#:tag "unit_convert"]{Unit conversion functions}
 
 @deftogether[(@defproc[(inches->pts [inches real?]) real?]
               @defproc[(cm->pts [cm real?]) real?])]{
