@@ -139,6 +139,7 @@
 (define current-spinewidth-pts (make-parameter 0))
 (define current-coverwidth-pts (make-parameter 0))
 (define current-interior-pagecount (make-parameter 0))
+(define current-scaling (make-parameter 0))
 
 (define current-cover-dc (make-parameter null))
 
@@ -149,11 +150,11 @@
 (define (current-spinerightedge-pts)
   (+ (current-pagewidth-pts) (current-spinewidth-pts)))
 
-(define (current-scaling)
+(define (set-current-scaling!)
   (define x (box 0))
   (define y (box 0))
   (send (current-ps-setup) get-scaling x y)
-  (unbox x))
+  (current-scaling (unbox x)))
 
 (define (bleed) (/ (current-bleed-pts) (current-scaling)))
 (define (pagewidth) (/ (current-pagewidth-pts) (current-scaling)))
@@ -237,6 +238,7 @@
   (match-define (list interior-width-pts interior-height-pts)
     (page-size interior-pdf-filename))
   (current-interior-pagecount (page-count interior-pdf-filename))
+  (set-current-scaling!)
   (current-pagewidth-pts  (+ interior-width-pts (current-bleed-pts)))
   (current-pageheight-pts (+ interior-height-pts (* 2 (current-bleed-pts))))
 
