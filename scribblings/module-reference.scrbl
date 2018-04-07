@@ -13,7 +13,7 @@
 
 @defmodule[bookcover/draw]
 
-This module is automatically imported by @code{#lang bookcover}. The only difference between @code{(require bookcover/draw)} and @code{#lang bookcover} is that with the former, @racket[finish-cover] is not automatically called at the end of your program. You might prefer to use the @racket[require] form when doing something fancier than creating just a single static cover; for example, when defining your own functions that create multiple book covers of the same style for different titles.
+This module is automatically provided by @code{#lang bookcover}. The only difference between the @code{require} form and @code{#lang bookcover} is that with the former, @racket[finish-cover] is not automatically called at the end of your program. You might prefer to use the @racket[require] form when doing something fancier than creating just a single static cover; for example, when defining your own functions that create multiple book covers of the same style for different titles.
 
 @defproc[(setup [#:interior-pdf interior-pdf path-string?]
                 [#:cover-pdf cover-pdf-filename path-string?]
@@ -119,7 +119,7 @@ Draw @racket[pic] on the ``front'' or ``back'' regions cover, using coordinates 
 (frontcover-draw pic)
 }
      
-The @racket[0] coordinates for the @racket[#:top] and @racket[#:left] arguments start at the very outside edge of the @tech{bleed}.
+The @racket[0] coordinates for either function's @racket[#:top] argument (as well as the @racket[#:left] argument of @racket[backcover]) start at the very outside edge of the @tech{bleed}.
      
 When @racket[hcenter] is @racket[#t], @racket[left] is ignored; likewise when @racket[vcenter] is @racket[#t], @racket[top] is ignored.}
 
@@ -163,7 +163,7 @@ The module keeps track of the cover's scaling value for you, and provides these 
               @defproc[(pagewidth) real?]
               @defproc[(spinewidth) real?]
               @defproc[(coverwidth) real?])]{
-Return the actual measurement of the element on the @racket[current-cover-dc], already divided by the scaling factor.
+Return the actual measurement of the element on the @racket[current-cover-dc], already divided by the scaling factor. (There is no ``@code{coverheight}'' function, since it would be redundant to @racket[pageheight].)
 
 The @racket[pagewidth], @racket[pageheight] and @racket[coverwidth] functions each include the width of the bleed on all applicable sides:
 
@@ -207,8 +207,8 @@ This PDF can be useful for mocking up a cover if you don't yet have a PDF of you
   Prints out a bunch of information about the current bleed, interior PDF page size, spine width calculation and cover size. Dimensions are formatted using @racket[unit-func].
 
 @examples[#:eval codebox
-(dummy-pdf "test.pdf" (inches->pts 4) (inches->pts 6) #:pages 99)
-(setup #:interior-pdf "test.pdf"
+(dummy-pdf "my-book.pdf" (inches->pts 4) (inches->pts 6) #:pages 100)
+(setup #:interior-pdf "my-book.pdf"
        #:cover-pdf "test-cover.pdf")
 (check-cover)
 ]}
