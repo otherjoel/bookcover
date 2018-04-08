@@ -246,6 +246,10 @@
 (define (centering-offset pic context-dim [dim-func pict-width])
   (/ (- context-dim (dim-func pic)) 2))
 
+(module+ test
+  (check-equal? 25 (centering-offset (circle 50) 100))
+  (check-equal? 25 (centering-offset (rectangle 30 50) 100 pict-height)))
+
 (define (frontcover-draw pic
                          #:top [y 0]
                          #:left [x 0]
