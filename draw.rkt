@@ -252,10 +252,10 @@
                          #:horiz-center? [hcenter #f]
                          #:vert-center? [vcenter #f])
   (define top-offset
-    (cond [vcenter (/ (- (pageheight) (pict-height pic)) 2)]
-          [else (+ (bleed) y)]))
+    (cond [vcenter (centering-offset pic (pageheight) pict-height)]
+          [else y]))
   (define left-offset
-    (cond [hcenter (+ (spinerightedge) (/ (- (pagewidth) (bleed) (pict-width pic)) 2))]
+    (cond [hcenter (+ (spinerightedge) (centering-offset pic (- (pagewidth) (bleed))))]
           [else (+ (spinerightedge) x)]))
 
   (draw-pict pic (current-cover-dc) left-offset top-offset))
@@ -266,11 +266,11 @@
                         #:horiz-center? [hcenter #f]
                         #:vert-center? [vcenter #f])
   (define top-offset
-    (cond [vcenter (/ (- (pageheight) (pict-height pic)) 2)]
-          [else (+ (bleed) y)]))
+    (cond [vcenter (centering-offset pic (pageheight) pict-height)]
+          [else y]))
   (define left-offset
-    (cond [hcenter (/ (- (pagewidth) (bleed) (pict-width pic)) 2)]
-          [else (+ (bleed) x)]))
+    (cond [hcenter (+ (bleed) (centering-offset pic (- (pagewidth) (bleed))))]
+          [else x]))
   
   (draw-pict pic (current-cover-dc) left-offset top-offset))
 
