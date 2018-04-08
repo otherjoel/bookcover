@@ -255,7 +255,9 @@
                #:cover-pdf cover-pdf-filename
                #:bleed-pts [bleed-pts (current-bleed-pts)]
                #:spine-calculator [spinewidth-calc (createspace-spine 'white-bw)])
-
+  (unless (null? (current-cover-dc))
+    (finish-cover))
+  
   ; Pull information out of the interior PDF and set parameters
   (match-define (list interior-width-pts interior-height-pts)
     (page-size interior-pdf-filename))
