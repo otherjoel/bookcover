@@ -321,13 +321,21 @@
 (define (check-cover #:unit-display [unit-func pts->inches-string])
   (define interior-pagewidth-pts (unit-func (- (current-pagewidth-pts) (current-bleed-pts))))
   (define interior-pageheight-pts (unit-func (- (current-pageheight-pts) (* 2 (current-bleed-pts)))))
-  (printf "Bleed:                ~a\n" (unit-func (current-bleed-pts)))
+  (match-define-values (size-x size-y) (send (current-cover-dc) get-size))
+  (printf "pdf-dc% get-size:     ~a ⨉ ~a\n" size-x size-y)
+  (printf "Cover size (w/bleed): ~a ⨉ ~a (~apts ⨉ ~apts)\n"
+          (unit-func (current-coverwidth-pts))
+          (unit-func (current-pageheight-pts))
+          (current-coverwidth-pts)
+          (current-pageheight-pts))
+  (printf "Scaling factor:       ~a\n" (current-scaling))
+  (printf "Bleed:                ~a (~a)\n" (unit-func (current-bleed-pts)) (bleed))
   (printf "Interior PDF size:    ~a ⨉ ~a\n" interior-pagewidth-pts interior-pageheight-pts)
   (printf "Interior pagecount:   ~a pages\n" (current-interior-pagecount))
   (printf "Spine multiplier:     ~a\n" ((current-spinewidth-calculator) 1))
   (printf "Spine width:          ~a (= ~a pages ⨉ ~a in inches)\n"
           (unit-func (current-spinewidth-pts)) (current-interior-pagecount) ((current-spinewidth-calculator) 1))
-  (printf "Cover size (w/bleed): ~a ⨉ ~a\n\n" (unit-func (current-coverwidth-pts)) (unit-func (current-pageheight-pts)))
+  
   (cond [(< (current-interior-pagecount) 101)
          (printf "CreateSpace would not allow text on spine (pages < 101)")]
         [(< (current-interior-pagecount) 130)
