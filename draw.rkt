@@ -1,28 +1,19 @@
 #lang racket
 
-; Convenience functions for creating and drawing on book covers
+;; Convenience functions for creating and drawing on book covers
 
 (provide (all-from-out racket/draw
                        pict))
 
 (provide (contract-out [existing-pdf? (path-string? . -> . boolean?)]))
 
-; Key function: prepares the pdf-dc% for the cover, and sets all parameters.
-; You will call this function at least once in every program that uses this package.
 (provide (contract-out
-          [setup (->*
-                  ; required arguments
-                  (#:interior-pdf (and/c path-string? existing-pdf?)
-                   #:cover-pdf path-string?)
+          [setup (->* (#:interior-pdf (and/c path-string? existing-pdf?)
+                       #:cover-pdf path-string?)
+                      (#:bleed-pts (and/c real? (not/c negative?))
+                       #:spine-calculator (exact-positive-integer? . -> . real?))
+                      void?)]))
 
-                  ; optional arguments
-                  (#:bleed-pts (and/c real? (not/c negative?))
-                   #:spine-calculator (exact-positive-integer? . -> . real?))
-
-                  ; return result
-                  void?)]))
-
-; Functions that return a function suitable for the #:spine-calculator argument for setup
 (provide
  (contract-out
   [createspace-spine ((or/c 'white-bw 'cream-bw 'color) . -> . (exact-positive-integer? . -> . real?))]
@@ -38,17 +29,9 @@
                     (#:pages exact-positive-integer?)
                     void?)]))
 
-(provide
- (contract-out
-  ; Get the pdf-dc% for the current cover
-  [current-cover-dc (-> (or/c null? (is-a?/c pdf-dc%)))]))
-
-; Close out the current cover PDF.
-; This is called automatically if your program uses #lang bookcover
+(provide (contract-out [current-cover-dc (-> (or/c null? (is-a?/c pdf-dc%)))]))
 (provide finish-cover)
 
-; Get coordinates/dimensions of various elements of the current cover
-; These have the current scaling already factored in so they can be used directly in drawing functions.
 (provide
  (contract-out
   [bleed          (-> real?)]
@@ -59,64 +42,50 @@
   [spinerightedge (-> real?)]
   [spineleftedge  (-> real?)]))
 
-; Draw dashed lines on the cover showing the bleed and spine areas.
-; Optionally pass in a color to use for the line.
 (provide
  (contract-out
   [outline-spine! (() ((or/c string? (is-a?/c color%) (list/c byte? byte? byte?))) . ->* . void?)]
   [outline-bleed! (() ((or/c string? (is-a?/c color%) (list/c byte? byte? byte?))) . ->* . void?)]))
 
-; Convenience functions for drawing on the cover using picts
 (provide
  (contract-out
-  ; Generic helper, provides offset to center a pict within a given dimension
-  [centering-offset (->*
-                     ; required:
-                     (pict-convertible? ; the pict
-                      real?)            ; dimension within which to center
-                     ; optional:
-                     ((pict? . -> . real?)) ; function that will be called to get the dimension of the pict
-                     ; result:
-                     real?)]
-
-  ; Draw on the FRONT cover with centering or using coords relative to the front cover's top left
-  [frontcover-draw (->* (pict-convertible?)    ; required arguments
-                        (#:top real?           ; optional arguments
+  [centering-offset (->* (pict-convertible? ; the pict
+                          real?)
+                         ((pict? . -> . real?))
+                         real?)]
+  [frontcover-draw (->* (pict-convertible?)
+                        (#:top real?
                          #:left real?
                          #:horiz-center? any/c
                          #:vert-center? any/c)
-                        void?)]                ; return value
-
-  ; Draw on the BACK cover with centering or using coords relative to the back cover's top left
-  [backcover-draw  (->* (pict-convertible?)    ; required arguments
-                        (#:top real?           ; optional arguments
+                        void?)]
+  [backcover-draw  (->* (pict-convertible?)
+                        (#:top real?
                          #:left real?
                          #:horiz-center? any/c
                          #:vert-center? any/c)
-                        void?)]                ; return value
-
-  ; Draw anywhere on the cover
+                        void?)]
   [cover-draw      (pict-convertible? real? real? . -> . void?)]
-
-  ; Draw something centered on the spine, with an optional top offset
   [spine-draw      (->* (pict-convertible?) (real?) void?)]))
 
 (provide
  (contract-out
-  ; Format points as a string using inches or centimeters
   [pts->inches-string (real? . -> . string?)]
   [pts->cm-string     (real? . -> . string?)]
-
-  ; Just prints out a bunch of measurements and diagnostic stuff about the current cover.
-  [check-cover (->* () ; no required arguments
-                    (#:unit-display (real? . -> . string?)) ; optional func for formatting the pts as a string
+  [check-cover (->* () 
+                    (#:unit-display (real? . -> . string?))
                     void?)]))
 
-; End of provides!
+;; ~~~ Requires ~~~
 
 (require pict
          pict/convert
          racket/draw)
+
+(module+ test
+  (require rackunit))
+
+;; ~~~ Spine width multipliers ~~~
 
 (define (createspace-spine paper-type)
   (define spine-multipliers
@@ -131,6 +100,17 @@
 (define (using-ppi pages-per-inch)
   (lambda (pages) (* pages (/ 1 pages-per-inch) 72.0)))
 
+(module+ test
+  (check-equal? 16.2144 ((createspace-spine 'white-bw) 100))
+  (check-equal? 18.0 ((createspace-spine 'cream-bw) 100))
+  (check-equal? 16.729416 ((createspace-spine 'color) 99))
+  (check-exn exn:fail:contract?
+             (lambda () (createspace-spine 'glitterbomb)))
+
+  (check-equal? 25.0 ((using-ppi 288) 100)))
+
+;; ~~~ Private parameters (not provided) ~~~
+
 (define default-bleed-inches 0.125)
 
 (define current-spinewidth-calculator (make-parameter (createspace-spine 'white-bw)))
@@ -142,6 +122,10 @@
 (define current-coverwidth-pts (make-parameter 0))
 (define current-interior-pagecount (make-parameter 0))
 (define current-scaling (make-parameter 0))
+
+; some derived values
+(define (current-spineleftedge-pts) (current-pagewidth-pts))
+(define (current-spinerightedge-pts) (+ (current-pagewidth-pts) (current-spinewidth-pts)))
 
 (define all-numeric-parameters
   (list current-bleed-pts
@@ -156,20 +140,13 @@
   (for ([param (in-list all-numeric-parameters)])
        (param 0)))
 
-(define current-cover-dc (make-parameter null))
-
-; Derived values
-(define (current-spineleftedge-pts)
-  (current-pagewidth-pts))
-
-(define (current-spinerightedge-pts)
-  (+ (current-pagewidth-pts) (current-spinewidth-pts)))
-
 (define (set-current-scaling!)
   (define x (box 0))
   (define y (box 0))
   (send (current-ps-setup) get-scaling x y)
   (current-scaling (unbox x)))
+
+;; ~~~ Measurement Functions ~~~
 
 (define (bleed) (/ (current-bleed-pts) (current-scaling)))
 (define (pagewidth) (/ (current-pagewidth-pts) (current-scaling)))
@@ -179,7 +156,7 @@
 (define (spineleftedge) (/ (current-spineleftedge-pts) (current-scaling)))
 (define (spinerightedge) (/ (current-spinerightedge-pts) (current-scaling)))
 
-; ~~~ Flaky PDF file info-getters - Not Provided ~~~
+;; ~~~ Dubious home-grown PDF file inspectors (not provided for liabity reasons) ~~~
 
 ; Get # of pages
 (define (page-count pdf-filename)
@@ -187,7 +164,7 @@
   
   (for/sum ([line (in-port read-line pdf)])
            (let ([x (regexp-match #px"/Type[\\s]*/Page(?:[^s]|$)" line)])
-             (if x (begin #|(print x)|# (count values x)) 0))))
+             (if x (count values x) 0))))
 
 ; Look for occurences of the form "/MediaBox [0.0 0.0 612.0 792.0]"
 ; and return the box dimensions
@@ -207,49 +184,22 @@
   (for/last ([line (stop-after (in-port read-line pdf) has-media-box?)])
             (has-media-box? line)))
 
-; Convenience converters
+;; ~~~ Unit conversions ~~~
+
 (define (inches->pts inches) (* inches 72.0))
 (define (cm->pts cm) (* (/ cm 2.54) 72.0))
 
-; Make a PDF for testing purposes
-(define (dummy-pdf filename width-pts height-pts #:pages [pages 1])
-  (define dummy-dc (new pdf-dc%
-                        [interactive #f]
-                        [as-eps #f]
-                        [use-paper-bbox #f]
-                        [width width-pts]
-                        [height height-pts]
-                        [output filename]))
-  (define t (text "JUST TESTING" "Arial" (round (/ width-pts 10))))
-  (define ctr-x (centering-offset t width-pts))
-  (define ctr-y (centering-offset t height-pts pict-height))
-  
-  (define (scrawl-testing)
-    (draw-pict t dummy-dc ctr-x ctr-y))
+(define (rounder num) (/ (round (* 1000 num)) 1000)) ; not provided
+(define (pts->inches-string pts) (format "~a″" (rounder (/ pts 72.0))))
+(define (pts->cm-string pts) (format "~acm" (rounder (* (/ pts 72.0) 2.54))))
 
-  (send* dummy-dc
-    (start-doc "useless string")
-    (start-page))
+(module+ test
+  (check-equal 72.0 (inches->pts 1))
+  (check-equal 72.0 (cm->pts 2.54))
+  (check-equal "1.0″" (pts->inches-string 72))
+  (check-equal "2.54cm" (pts->cm-string 72)))
 
-  (scrawl-testing)
-  
-  (unless (< pages 2)
-    (for ([n (in-range 1 pages)])
-         (send* dummy-dc
-           (end-page)
-           (start-page))
-         (scrawl-testing)))
-  
-  (send* dummy-dc
-    (end-page)
-    (end-doc)))
-
-(define (file-extension file)
-  (string-downcase (last (string-split file "."))))
-
-(define (existing-pdf? file)
-  (and (file-exists? file)
-       (string=? "pdf" (file-extension file))))
+;; ~~~ Cover Setup/Teardown ~~~
 
 (define (setup #:interior-pdf interior-pdf-filename
                #:cover-pdf cover-pdf-filename
@@ -281,17 +231,7 @@
     (start-doc "useless string")
     (start-page)))
 
-(define (outline-spine! [linecolor "black"])
-  (define spineline (colorize (linewidth 0.2 (linestyle 'dot (vline 1 (pageheight)))) linecolor))
-  (draw-pict spineline (current-cover-dc) (spineleftedge) 0)
-  (draw-pict spineline (current-cover-dc) (spinerightedge) 0))
-
-(define (outline-bleed! [linecolor "black"])
-  (define rect (rectangle (- (coverwidth) (* 2 (bleed))) (- (pageheight) (* 2 (bleed)))))
-  (draw-pict (linewidth 0.2 (linestyle 'dot (colorize rect linecolor)))
-             (current-cover-dc)
-             (bleed)
-             (bleed)))
+(define current-cover-dc (make-parameter null))
   
 (define (finish-cover)
   (unless (null? (current-cover-dc))
@@ -300,7 +240,8 @@
       (end-page)
       (end-doc))))
 
-; Returns an offset that will center pic within a given length.
+;; ~~~ Drawing functions ~~~
+
 (define (centering-offset pic context-dim [dim-func pict-width])
   (/ (- context-dim (dim-func pic)) 2))
 
@@ -339,9 +280,58 @@
   (define leftedge (+ (spineleftedge) (centering-offset pic (spinewidth))))
   (draw-pict pic (current-cover-dc) leftedge top-offset))
 
-(define (rounder num) (/ (round (* 1000 num)) 1000))
-(define (pts->inches-string pts) (format "~a″" (rounder (/ pts 72.0))))
-(define (pts->cm-string pts) (format "~acm" (rounder (* (/ pts 72.0) 2.54))))
+(define (outline-spine! [linecolor "black"])
+  (define spineline (colorize (linewidth 0.2 (linestyle 'dot (vline 1 (pageheight)))) linecolor))
+  (draw-pict spineline (current-cover-dc) (spineleftedge) 0)
+  (draw-pict spineline (current-cover-dc) (spinerightedge) 0))
+
+(define (outline-bleed! [linecolor "black"])
+  (define rect (rectangle (- (coverwidth) (* 2 (bleed))) (- (pageheight) (* 2 (bleed)))))
+  (draw-pict (linewidth 0.2 (linestyle 'dot (colorize rect linecolor)))
+             (current-cover-dc)
+             (bleed)
+             (bleed)))
+
+;; ~~~ Testing/Diagnostics ~~~
+
+(define (file-extension file)
+  (string-downcase (last (string-split file "."))))
+
+(define (existing-pdf? file)
+  (and (file-exists? file)
+       (string=? "pdf" (file-extension file))))
+
+(define (dummy-pdf filename width-pts height-pts #:pages [pages 1])
+  (define dummy-dc (new pdf-dc%
+                        [interactive #f]
+                        [as-eps #f]
+                        [use-paper-bbox #f]
+                        [width width-pts]
+                        [height height-pts]
+                        [output filename]))
+  (define t (text "JUST TESTING" "Arial" (round (/ width-pts 10))))
+  (define ctr-x (centering-offset t width-pts))
+  (define ctr-y (centering-offset t height-pts pict-height))
+  
+  (define (scrawl-testing)
+    (draw-pict t dummy-dc ctr-x ctr-y))
+
+  (send* dummy-dc
+    (start-doc "useless string")
+    (start-page))
+
+  (scrawl-testing)
+  
+  (unless (< pages 2)
+    (for ([n (in-range 1 pages)])
+         (send* dummy-dc
+           (end-page)
+           (start-page))
+         (scrawl-testing)))
+  
+  (send* dummy-dc
+    (end-page)
+    (end-doc)))
 
 (define (check-cover #:unit-display [unit-func pts->inches-string])
   (define interior-pagewidth-pts (unit-func (- (current-pagewidth-pts) (current-bleed-pts))))
@@ -367,3 +357,7 @@
          (printf "CreateSpace would not allow text on spine (pages < 101)")]
         [(< (current-interior-pagecount) 130)
          (printf "CreateSpace does not recommend text on spine (pages < 130)")]))
+
+(module+ test
+  (check-equal? void (dummy-pdf "test-interior.pdf" (inches->pts 4) (inches->pts 6) #:pages 100))
+  (delete-file "test-interior.pdf"))
