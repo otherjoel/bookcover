@@ -5,12 +5,14 @@
 (provide (all-from-out racket/draw
                        pict))
 
+(provide (contract-out [existing-pdf? (path-string? . -> . boolean?)]))
+
 ; Key function: prepares the pdf-dc% for the cover, and sets all parameters.
 ; You will call this function at least once in every program that uses this package.
 (provide (contract-out
           [setup (->*
                   ; required arguments
-                  (#:interior-pdf path-string? 
+                  (#:interior-pdf (and/c path-string? existing-pdf?)
                    #:cover-pdf path-string?)
 
                   ; optional arguments
@@ -228,6 +230,13 @@
   (send* dummy-dc
     (end-page)
     (end-doc)))
+
+(define (file-extension file)
+  (string-downcase (last (string-split file "."))))
+
+(define (existing-pdf? file)
+  (and (file-exists? file)
+       (string=? "pdf" (file-extension file))))
 
 (define (setup #:interior-pdf interior-pdf-filename
                #:cover-pdf cover-pdf-filename
