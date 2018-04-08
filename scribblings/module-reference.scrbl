@@ -154,9 +154,7 @@ By design, this function does not check or care if @racket[pic] will fit inside 
 
 @section[#:tag "measurement-functions"]{Measurement functions}
 
-When @emph{setting up} your cover, everything is specified in @tech{points}. In a simple world, you could just use those same point values as coordinates for drawing on your cover. But PDF objects in Racket also have a scaling factor that is applied after the object is created. So those original point values need to be divided by that scaling factor in order to get values that you can properly use for placing elements.
-
-The module keeps track of the cover's scaling value for you, and provides these measurement functions that return values that are ready to use for calculating where to place things on your cover.
+When @emph{setting up} your cover, everything is specified in @tech{points}. But when you ask Racket for the dimensions of the PDF object you've just created, you'll get a different value than the point value you specified. This is because PDF objects in Racket also have a scaling factor (0.8 by default) that is applied to each dimension when the object is created. So if you specify that your cover should have a @tech{bleed} of 9 points (1/8 inch), the ``actual'' width --- the one returned by the @racket[bleed] function --- will be generally be 11.25. These scaled values are the ones you must use when drawing on the cover.
 
 @deftogether[(@defproc[(bleed) real?]
               @defproc[(pageheight) real?]

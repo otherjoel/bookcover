@@ -38,7 +38,7 @@ To try this out for yourself, save this program as @filepath{example-cover.rkt} 
 
 When @filepath{my-book.pdf} is has 100 pages which are 4 inches wide by 6 inches tall, running this program produces a file @filepath{example-cover.pdf} that looks like this (shown at reduced scale):
 
-@centered{@image[example-cover-png #:scale 0.3]}
+@centered{@image[example-cover-png #:scale 0.5]}
 
 Note the anatomy of the book cover: it's a single image that ``wraps'' around the entire book, starting with the back cover on the far left, then the spine, then the front cover.
 
@@ -50,7 +50,7 @@ Let's look at this example program in more detail.
 
 The very first line is @code{#lang bookcover}, which provides all the functions from @racketmodname[bookcover/draw] (as well as @racketmodname[pict] and @racketmodname[racket/draw]) and ensures that the cover PDF is properly closed and saved at the end of your program.
 
-The call to @racket[setup] is important: until you do it, you can’t actually draw anything. You will call it at least once in your book cover program, and you must give it at least two things: the filename of an existing PDF that will be used as the book's interior, and the filename to use when saving the cover PDF. The size and number of pages in the interior PDF will directly determine the dimensions of your cover.  This function also takes some additional, optional arguments that let you override the default @tech{bleed} width and/or the default @tech{spine width calculator}.
+The call to @racket[setup] is important: until you do it, you can’t actually draw anything. You will call it at least once in your book cover program, and you must give it at least two things: the filename of an existing PDF that will be used as the book's interior, and the filename to use when saving the cover PDF. The size and number of pages in the interior PDF will directly determine the dimensions of your cover. 
 
 Next, the program creates some @racket[pict]s that will later be drawn onto the cover. Again, everything in the @racketmodname[pict] module is available to you automatically. Note the use of no-argument @secref["measurement-functions"] like @racket[pageheight] that let you easily base the size and/or placement of these picts on the overall dimensions of the cover. That way, if your book's interior size or page-count change, not only will your cover's overall dimensions resize appropriately, but the elements on it can adjust their size and placement as well. (Web developers will recognize this practice as ``responsive design''.)
 
