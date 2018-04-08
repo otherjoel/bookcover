@@ -203,7 +203,7 @@
 
 (define (setup #:interior-pdf interior-pdf-filename
                #:cover-pdf cover-pdf-filename
-               #:bleed-pts [bleed-pts (current-bleed-pts)]
+               #:bleed-pts [bleed-pts (* default-bleed-inches 72)]
                #:spine-calculator [spinewidth-calc (createspace-spine 'white-bw)])
   (unless (null? (current-cover-dc))
     (finish-cover))
@@ -212,6 +212,7 @@
   (match-define (list interior-width-pts interior-height-pts)
     (page-size interior-pdf-filename))
   (current-interior-pagecount (page-count interior-pdf-filename))
+  (current-bleed-pts bleed-pts)
   (set-current-scaling!)
   (current-pagewidth-pts  (+ interior-width-pts (current-bleed-pts)))
   (current-pageheight-pts (+ interior-height-pts (* 2 (current-bleed-pts))))
