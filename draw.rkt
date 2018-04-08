@@ -194,10 +194,10 @@
 (define (pts->cm-string pts) (format "~acm" (rounder (* (/ pts 72.0) 2.54))))
 
 (module+ test
-  (check-equal 72.0 (inches->pts 1))
-  (check-equal 72.0 (cm->pts 2.54))
-  (check-equal "1.0″" (pts->inches-string 72))
-  (check-equal "2.54cm" (pts->cm-string 72)))
+  (check-equal? 72.0 (inches->pts 1))
+  (check-equal? 72.0 (cm->pts 2.54))
+  (check-equal? "1.0″" (pts->inches-string 72))
+  (check-equal? "2.54cm" (pts->cm-string 72)))
 
 ;; ~~~ Cover Setup/Teardown ~~~
 
@@ -359,5 +359,12 @@
          (printf "CreateSpace does not recommend text on spine (pages < 130)")]))
 
 (module+ test
-  (check-equal? void (dummy-pdf "test-interior.pdf" (inches->pts 4) (inches->pts 6) #:pages 100))
+  (check-equal? (void) (dummy-pdf "test-interior.pdf" (inches->pts 4) (inches->pts 6) #:pages 100))
+  (check-equal? (void) (setup #:interior-pdf "test-interior.pdf"
+                              #:cover-pdf "test-cover.pdf"
+                              #:bleed-pts (inches->pts 0.25)
+                              #:spine-calculator (using-ppi 360)))
+  (check-equal? (void) (check-cover))
+  (check-equal? 767.5 (coverwidth))
+  (check-equal? 562.5 (pageheight))
   (delete-file "test-interior.pdf"))
