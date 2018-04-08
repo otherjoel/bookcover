@@ -350,8 +350,11 @@
   (printf "Interior PDF size:    ~a ⨉ ~a\n" interior-pagewidth-pts interior-pageheight-pts)
   (printf "Interior pagecount:   ~a pages\n" (current-interior-pagecount))
   (printf "Spine multiplier:     ~a\n" ((current-spinewidth-calculator) 1))
-  (printf "Spine width:          ~a (= ~a pages ⨉ ~a in inches)\n"
-          (unit-func (current-spinewidth-pts)) (current-interior-pagecount) ((current-spinewidth-calculator) 1))
+  (printf "Spine width:          ~a (~a pages ⨉ ~a = ~a pts)\n"
+          (unit-func (current-spinewidth-pts))
+          (current-interior-pagecount)
+          ((current-spinewidth-calculator) 1)
+          (current-spinewidth-pts))
   
   (cond [(< (current-interior-pagecount) 101)
          (printf "CreateSpace would not allow text on spine (pages < 101)")]
