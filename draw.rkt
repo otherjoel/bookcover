@@ -143,6 +143,19 @@
 (define current-interior-pagecount (make-parameter 0))
 (define current-scaling (make-parameter 0))
 
+(define all-numeric-parameters
+  (list current-bleed-pts
+        current-pagewidth-pts
+        current-pageheight-pts
+        current-spinewidth-pts
+        current-coverwidth-pts
+        current-interior-pagecount
+        current-scaling))
+
+(define (reset-numeric-parameters)
+  (for ([param (in-list all-numeric-parameters)])
+       (param 0)))
+
 (define current-cover-dc (make-parameter null))
 
 ; Derived values
@@ -280,6 +293,7 @@
   
 (define (finish-cover)
   (unless (null? (current-cover-dc))
+    (reset-numeric-parameters)
     (send* (current-cover-dc)
       (end-page)
       (end-doc))))
