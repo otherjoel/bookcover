@@ -14,7 +14,7 @@
                    #:cover-pdf path-string?)
 
                   ; optional arguments
-                  (#:bleed-pts real?
+                  (#:bleed-pts (and/c real? (not/c negative?))
                    #:spine-calculator (exact-positive-integer? . -> . real?))
 
                   ; return result
