@@ -348,11 +348,13 @@
   (define interior-pageheight-pts (unit-func (- (current-pageheight-pts) (* 2 (current-bleed-pts)))))
   (match-define-values (size-x size-y) (send (current-cover-dc) get-size))
   (printf "pdf-dc% get-size:     ~a ⨉ ~a\n" size-x size-y)
-  (printf "Cover size (w/bleed): ~a ⨉ ~a (~apts ⨉ ~apts)\n"
+  (printf "Cover size (w/bleed): ~a ⨉ ~a (~apts ⨉ ~apts, w/scaling ~a ⨉ ~a)\n"
           (unit-func (current-coverwidth-pts))
           (unit-func (current-pageheight-pts))
           (current-coverwidth-pts)
-          (current-pageheight-pts))
+          (current-pageheight-pts)
+          (rounder (coverwidth))
+          (rounder (pageheight)))
   (printf "Scaling factor:       ~a\n" (current-scaling))
   (printf "Bleed:                ~a (~a)\n" (unit-func (current-bleed-pts)) (bleed))
   (printf "Interior PDF size:    ~a ⨉ ~a\n" interior-pagewidth-pts interior-pageheight-pts)
