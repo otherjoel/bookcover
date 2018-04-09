@@ -16,11 +16,13 @@ As an alternative to designing your book's cover with a program like InDesign or
  @item{Your book cover has access to a complete programming environment. Whether it's getting values from a SQL database or using procedurally generated fractal art: if it can be done with code, it can be very easily placed on your book's cover.}
 ]
 
-This library/language does nothing very magical; it's just a thin layer on top of the @racketmodname[pict] and @racketmodname[racket/draw] libraries that come with Racket. What it does do is abstract away most of the tedious math and setup involved with using those libraries for this particular purpose.
+This library/language does nothing very magical; it's just a thin layer on top of the @racketmodname[pict] and @racketmodname[racket/draw] libraries that come with Racket. What it does do is abstract away most of the tedious math and setup involved with using those libraries for this particular purpose. I've used it successfully on @hyperlink["https://www.dicewordbook.com"]{one book}, so I'm reasonably sure it will work for you too.
 
 If you're new to Racket, you would do very well to read @other-doc['(lib "scribblings/quick/quick.scrbl")]. Not only will you learn the basics of writing Racket programs, you can snap those same drawing functions together with the ones in this library to create your book covers.
 
 @bold{NB:} This is my first ever Racket module, and it has had very little testing outside of my own small projects. For these reasons, it should for now be considered unstable: the functions it provides may change. After I've gathered and incorporated some feedback, I will solidify things a bit and make a 1.0.0 version.
+
+The source for this package is at @url["https://github.com/otherjoel/bookcover"].
 
 @local-table-of-contents[]
 
