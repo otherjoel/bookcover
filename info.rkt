@@ -6,5 +6,12 @@
 (define deps '("base"
                "beautiful-racket-lib"
                "draw-lib"
-               "pdf-read"
                "pict-lib"))
+(define test-omit-paths '("scribblings/make-dummy.rkt"
+                          "scribblings/example-cover.rkt"))
+(define build-deps '("draw-doc"
+                     "pict-doc"
+                     "racket-doc"
+                     "rackunit-lib"
+                     "scribble-lib"
+                     "slideshow-doc"))

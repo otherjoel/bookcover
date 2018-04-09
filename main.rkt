@@ -9,8 +9,7 @@
 (require "draw.rkt"
          br/define
          racket/draw
-         pict
-         pdf-read)
+         pict)
 
 (module* reader syntax/module-reader 
   bookcover)
