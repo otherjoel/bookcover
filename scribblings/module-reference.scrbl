@@ -207,9 +207,14 @@ This PDF can be useful for mocking up a cover if you don't yet have a PDF of you
 @examples[#:eval codebox
 (dummy-pdf "my-book.pdf" (inches->pts 4) (inches->pts 6) #:pages 100)
 (setup #:interior-pdf "my-book.pdf"
-       #:cover-pdf "test-cover.pdf")
+       #:cover-pdf "my-cover.pdf")
 (check-cover)
 ]}
+
+@;Cleanup
+@(codebox '(begin (finish-cover)
+                  (delete-file "my-book.pdf")
+                  (delete-file "my-cover.pdf")))
 
 @section[#:tag "unit_convert"]{Unit conversion functions}
 
