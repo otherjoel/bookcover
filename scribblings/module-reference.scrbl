@@ -158,10 +158,11 @@ When @emph{setting up} your cover, everything is specified in @tech{points}. But
 
 @deftogether[(@defproc[(bleed) real?]
               @defproc[(pageheight) real?]
+              @defproc[(coverheight) real?]
               @defproc[(pagewidth) real?]
               @defproc[(spinewidth) real?]
               @defproc[(coverwidth) real?])]{
-Return the actual measurement of the element on the @racket[current-cover-dc], already divided by the scaling factor. (There is no ``@code{coverheight}'' function, since it would be redundant to @racket[pageheight].)
+Return the actual measurement of the element on the @racket[current-cover-dc], already divided by the scaling factor. The @racket[coverheight] function is identical to @racket[pageheight].
 
 The @racket[pagewidth], @racket[pageheight] and @racket[coverwidth] functions each include the width of the bleed on all applicable sides:
 

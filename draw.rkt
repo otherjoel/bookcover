@@ -39,6 +39,7 @@
   [pagewidth      (-> real?)]
   [spinewidth     (-> real?)]
   [coverwidth     (-> real?)]
+  [coverheight    (-> real?)]
   [spinerightedge (-> real?)]
   [spineleftedge  (-> real?)]))
 
@@ -151,6 +152,7 @@
 (define (bleed) (/ (current-bleed-pts) (current-scaling)))
 (define (pagewidth) (/ (current-pagewidth-pts) (current-scaling)))
 (define (pageheight) (/ (current-pageheight-pts) (current-scaling)))
+(define coverheight pageheight)
 (define (spinewidth) (/ (current-spinewidth-pts) (current-scaling)))
 (define (coverwidth) (/ (current-coverwidth-pts) (current-scaling)))
 (define (spineleftedge) (/ (current-spineleftedge-pts) (current-scaling)))
@@ -375,6 +377,7 @@
   (check-equal? (void) (check-cover))
   (check-equal? 790.0 (coverwidth))
   (check-equal? 585.0 (pageheight))
+  (check-equal? 585.0 (coverheight))
   (check-equal? 382.5 (pagewidth))
   (check-equal? 382.5 (spineleftedge))
   (check-equal? 25.0 (spinewidth))
