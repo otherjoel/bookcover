@@ -364,9 +364,9 @@
           (current-spinewidth-pts))
   
   (cond [(< (current-interior-pagecount) 101)
-         (printf "CreateSpace would not allow text on spine (pages < 101)")]
+         (printf "CreateSpace would not allow text on spine (pages < 101)\n")]
         [(< (current-interior-pagecount) 130)
-         (printf "CreateSpace does not recommend text on spine (pages < 130)")]))
+         (printf "CreateSpace does not recommend text on spine (pages < 130)\n")]))
 
 (module+ test
   (check-equal? (void) (dummy-pdf "test-interior.pdf" (inches->pts 4) (inches->pts 6) #:pages 100))
