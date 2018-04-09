@@ -1,13 +1,16 @@
 SHELL = /bin/bash
 
-scribblings/example-cover.pdf: scribblings/example-cover.rkt
-	cd scribblings && racket -r example-cover.rkt
+scribblings/my-book.pdf: scribblings/make-dummy.rkt
+	cd scribblings; racket make-dummy.rkt
+
+scribblings/example-cover.pdf: scribblings/example-cover.rkt scribblings/my-book.pdf
+	cd scribblings; racket example-cover.rkt
 
 scribblings/example-cover.png: scribblings/example-cover.pdf
 	sips -s format png --out scribblings/example-cover.png scribblings/example-cover.pdf
 
-all: ## Update all targets
-all: scribblings/example-cover.png
+png: ## Update the example-cover.png file
+png: scribblings/example-cover.png
 
 .PHONY: all zap help
 
