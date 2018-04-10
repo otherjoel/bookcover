@@ -23,11 +23,32 @@ The most basic way to use @racketmodname[bookcover] is as a single-file Racket p
 
 Here's an example book cover program:
 
-@(define-runtime-path example-cover-rkt "example-cover.rkt")
-@(define-runtime-path example-cover-png "example-cover.png")
+@;{ IMPORTANT…If you change this example program below, change it
+    in example-cover.rkt also!
+    
+    Then from the package main folder run `make png` to update the
+    example-cover.png.
+}
+@filebox["example-cover.rkt"]{
+@codeblock[#:keep-lang-line? #t]{
+#lang bookcover
+          
+(setup #:interior-pdf "my-book.pdf"
+       #:cover-pdf "example-cover.pdf")
 
-@filebox["example-cover.rkt"]{@codeblock{
-@file->string[example-cover-rkt]
+(define title (text "Sunshine for Sal" "Plantin Std, Semibold" 42))
+(define subtitle (text "A Painfully Verbose Memoir" '(italic . "Plantin Std") 24))
+(define accent (filled-rectangle (coverwidth)
+                                 (/ (pageheight) 3)
+                                 #:color "LemonChiffon"
+                                 #:draw-border? #f))
+
+(cover-draw accent 0 (/ (pageheight) 3))
+(frontcover-draw title #:top (* (pageheight) 2/6) #:horiz-center? #t)
+(frontcover-draw subtitle #:top (* (pageheight) 3/6) #:horiz-center? #t)
+
+(outline-spine! "red")
+(outline-bleed!)
 }}
 
 To try this out for yourself, save this program as @filepath{example-cover.rkt} in the same folder as a PDF file @filepath{my-book.pdf} (as seen in the call to @racket[setup] above). If you don't have such a file, add this line of code immediately before the line with @racket[setup] on it:
@@ -36,8 +57,9 @@ To try this out for yourself, save this program as @filepath{example-cover.rkt} 
 (dummy-pdf "my-book.pdf" (inches->pts 4) (inches->pts 6) #:pages 100)
 }
 
-When @filepath{my-book.pdf} is has 100 pages which are 4 inches wide by 6 inches tall, running this program produces a file @filepath{example-cover.pdf} that looks like this (shown at reduced scale):
+So when @filepath{my-book.pdf} has 100 pages which are 4 inches wide by 6 inches tall, running this program produces a file @filepath{example-cover.pdf} that looks like this (shown at reduced scale):
 
+@(define-runtime-path example-cover-png "example-cover.png")
 @centered{@image[example-cover-png #:scale 0.5]}
 
 Note the anatomy of the book cover: it's a single image that ``wraps'' around the entire book, starting with the back cover on the far left, then the spine, then the front cover.

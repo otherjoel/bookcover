@@ -1,18 +1,12 @@
 SHELL = /bin/bash
 
-scribblings/my-book.pdf: scribblings/make-dummy.rkt
-	cd scribblings; racket make-dummy.rkt
-
-scribblings/example-cover.pdf: scribblings/example-cover.rkt scribblings/my-book.pdf
+scribblings/example-cover.png: scribblings/example-cover.rkt
 	cd scribblings; racket example-cover.rkt
-
-scribblings/example-cover.png: scribblings/example-cover.pdf
-	sips -s format png --out scribblings/example-cover.png scribblings/example-cover.pdf
 
 png: ## Update the example-cover.png file
 png: scribblings/example-cover.png
 
-.PHONY: all zap help
+.PHONY: png zap help
 
 zap: ## Deletes Racket caches and all scribble output
 	rm *.rkt~; \
