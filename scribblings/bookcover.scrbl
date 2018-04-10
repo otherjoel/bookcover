@@ -6,7 +6,7 @@
 
 @defmodulelang[bookcover]
 
-Creating a digital cover for a printed book can be one of the most tedious parts of self-publishing. Printing services have strict requirements and formulas you must use to calculate the cover's dimensions. You need to calculate the width of the book's spine based on page count and paper type, add space for bleed, and so forth. If you change anything about your book that  a page or two --- you'll need to start all over again.
+Creating a cover for a printed book can be one of the most tedious parts of self-publishing. Printing services have requirements for the cover's dimensions. You need to calculate the width of the book's spine based on page count and paper type, add space for bleed, and so forth. If you change anything about the inside of your book, you need to run your calculations all over again.
 
 As an alternative to designing your book's cover with a program like InDesign or Photoshop, you can instead implement it as a Racket program that dynamically calculates everything for you and generates the cover in PDF form each time it is run. This has a few advantages:
 
@@ -16,9 +16,9 @@ As an alternative to designing your book's cover with a program like InDesign or
  @item{Your book cover has access to a complete programming environment. Whether it's getting values from a SQL database or using procedurally generated fractal art: if it can be done with code, it can be very easily placed on your book's cover.}
 ]
 
-This library/language does nothing very magical; it's just a thin layer on top of the @racketmodname[pict] and @racketmodname[racket/draw] libraries that come with Racket. What it does do is abstract away most of the tedious math and setup involved with using those libraries for this particular purpose. I've used it successfully on @hyperlink["https://www.dicewordbook.com"]{one book}, so I'm reasonably sure it will work for you too.
+This library/language does nothing very magical; it's just a thin layer on top of the @racketmodname[pict] and @racketmodname[racket/draw] libraries that come with Racket. What it does do is abstract away almost all of the tedious math and setup involved with using those libraries for this particular purpose. I've used it successfully on @hyperlink["https://dicewordbook.com"]{one book}, so I'm reasonably sure it will work for you too.
 
-If you're new to Racket, you would do very well to read @other-doc['(lib "scribblings/quick/quick.scrbl")]. Not only will you learn the basics of writing Racket programs, you can snap those same drawing functions together with the ones in this library to create your book covers.
+If you're new to Racket, you would do very well to read @other-doc['(lib "scribblings/quick/quick.scrbl")] first. Not only will you learn the basics of writing Racket programs, but many of the functions used in that tutorial are the same ones you'll be snapping together with the ones in this library to create your book covers.
 
 @bold{NB:} This is my first ever Racket module, and it has had very little testing outside of my own small projects. For these reasons, it should for now be considered unstable: the functions it provides may change. After I've gathered and incorporated some feedback, I will solidify things a bit and make a 1.0.0 version.
 
