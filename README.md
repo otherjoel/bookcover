@@ -6,4 +6,4 @@ Documenation is at <https://docs.racket-lang.org/bookcover/index.html>
 
 See an example of [a cover created with this package](https://dicewordbook.com).
 
-Licensed under LGPL (see [LICENSE.txt](LICENSE.TXT)).
+Licensed under LGPL (see [LICENSE.txt](LICENSE.txt)).
