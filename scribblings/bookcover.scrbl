@@ -13,7 +13,7 @@ As an alternative to designing your book's cover with a program like InDesign or
 @itemlist[
  @item{If your book's page count changes, you can re-run the program and your cover will be adjusted automatically.}
  @item{You can keep your book's cover under version control and track changes more easily (useful when @link["http://pollenpub.com"]{the book itself is also a program}).}
- @item{Your book cover has access to a complete programming environment. Whether it's getting values from a SQL database or using procedurally generated fractal art: if it can be done with code, it can be very easily placed on your book's cover.}
+ @item{Your book cover has access to a complete programming environment. Whether it's getting values from a SQL database or using procedurally generated fractal art (@link["https://web.archive.org/web/20081015005111/http://postspectacular.com/process/20080711_faberfindslaunch"]{@italic{Faber Finds} generative book covers}, anyone?): if it can be done with code, it can be very easily placed on your book's cover.}
 ]
 
 This library/language does nothing very magical; it's just a thin layer on top of the @racketmodname[pict] and @racketmodname[racket/draw] libraries that come with Racket. What it does do is abstract away almost all of the tedious math and setup involved with using those libraries for this particular purpose. I've used it successfully on @hyperlink["https://dicewordbook.com"]{one book}, so I'm reasonably sure it will work for you too.
