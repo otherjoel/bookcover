@@ -4,8 +4,9 @@
 *.swp
 compiled/
 \#*.*
-scribblings/*.html
-scribblings/*.css
-scribblings/*.js
-scribblings/*.pdf
+*.html
+*.css
+*.js
+*.pdf
+scribblings/bookcover/*
 doc/*

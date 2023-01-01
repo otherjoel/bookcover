@@ -3,10 +3,18 @@ SHELL = /bin/bash
 scribblings/example-cover.png: scribblings/example-cover.rkt
 	cd scribblings; racket example-cover.rkt
 
+scribble: scribblings/bookcover.scrbl
+scribble: ## Rebuild Scribble docs
+	rm -rf scribblings/bookcover/* || true
+	cd scribblings && scribble --htmls +m --redirect https://docs.racket-lang.org/local-redirect/ bookcover.scrbl
+
+publish: ## Sync Scribble HTML docs to web server (doesn’t rebuild anything)
+	rsync -av --delete scribblings/bookcover/ $(JDCOM_SRV)what-about/bookcover/
+
 png: ## Update the example-cover.png file
 png: scribblings/example-cover.png
 
-.PHONY: png zap help
+.PHONY: scribble publish png zap help
 
 zap: ## Deletes Racket caches and all scribble output
 	rm *.rkt~; \
