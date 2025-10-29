@@ -15,3 +15,4 @@
                      "rackunit-lib"
                      "scribble-lib"
                      "slideshow-doc"))
+(define license 'LGPL-3.0-only)
