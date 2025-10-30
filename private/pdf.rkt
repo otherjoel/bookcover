@@ -1,6 +1,9 @@
-#lang racket
+#lang racket/base
 
-(require file/gunzip)
+(require file/gunzip
+         racket/file
+         racket/list
+         racket/match)
 
 ;; API to fetch page count and size info for a PDF file.
 ;; We assume this PDF is for the interior of a book and that all pages are the same size.

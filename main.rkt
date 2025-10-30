@@ -1,23 +1,23 @@
-#lang racket
+#lang racket/base
 
-; #lang bookcover - A language for making book covers
+;; #lang bookcover - A language for making book covers
 
-(provide (rename-out [bookcover-begin #%module-begin])
-         (except-out [all-from-out racket] #%module-begin)
-         (all-from-out "draw.rkt"))
-
-(require "draw.rkt"
-         br/define
+(require (for-syntax racket/base syntax/parse)
+         "draw.rkt"
          racket/draw
          pict)
+
+(provide (rename-out [bookcover-begin #%module-begin])
+         (except-out [all-from-out racket/base] #%module-begin)
+         (all-from-out pict)
+         (all-from-out "draw.rkt"))
 
 (module* reader syntax/module-reader 
   bookcover)
 
-(define-macro-cases bookcover-begin
-  [(bookcover-begin EXPRESSIONS ...)
-   #'(#%module-begin
-      EXPRESSIONS ...
-      (finish-cover))])
-
-
+(define-syntax (bookcover-begin stx)
+  (syntax-parse stx
+    [(_ e:expr ...)
+     #'(#%module-begin
+        e ...
+        (finish-cover))]))
