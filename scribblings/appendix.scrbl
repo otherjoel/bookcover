@@ -22,8 +22,8 @@ for bleed. But the printing service will require it anyway.
 
 @section{Points}
 
-For historical reasons, the dimensions of a PDF files in Racket are specified in @deftech{points}:
+For historical reasons, the dimensions of PDF pages in Racket are specified in @deftech{points}:
 there are 72 points in an inch, and @number->string[(cm->pts 1)] points in a centimeter (sorry,
 metric folks).
 
-If you want to specify convert to points using your favorite units, use @secref["unit_convert"].
+If you want to specify page dimensions using your favorite units, use @secref["unit_convert"].
