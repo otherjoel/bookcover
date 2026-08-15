@@ -22,10 +22,13 @@
 ;; There are PDFs out there that won't work with this approach. But this has worked for me so far.
 
 ;; Bytes -> Bytes
+;; Returns empty bytes for streams that are not zlib/deflate-compressed
+;; (e.g., embedded images), rather than erroring out.
 (define (inflate-bytes compressed)
-  (define out (open-output-bytes))
-  (inflate (open-input-bytes compressed) out)
-  (get-output-bytes out))
+  (with-handlers ([exn:fail? (λ (e) #"")])
+    (define out (open-output-bytes))
+    (inflate (open-input-bytes compressed) out)
+    (get-output-bytes out)))
 
 ;; Search for a "stream" (chunk of compressed binary data) in a byte string of PDF data
 ;; Returns index for use as start of next search, and the uncompressed bytes of the stream
@@ -45,7 +48,8 @@
 
 (define (page-data pdf-filename)
   (define pdf-bytes (file->bytes pdf-filename))
-  (define rx-page #px#"/Type[\\s]*/Page(?:[^s]|$)")
+  ;; Negative lookahead so we match neither /Pages nor /PageLabel
+  (define rx-page #px#"/Type[\\s]*/Page(?![A-Za-z])")
   (define plain-count (count values (regexp-match* rx-page pdf-bytes)))
   (define page-size (find-mediabox pdf-bytes))
   (define compressed-count
