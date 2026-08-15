@@ -243,32 +243,34 @@
   (check-equal? 25 (centering-offset (circle 50) 100))
   (check-equal? 25 (centering-offset (rectangle 30 50) 100 pict-height)))
 
+;; Compute the top-left drawing coordinates for a pict on the front or back cover.
+;; Not provided; factored out of the -draw functions so the tests can check them.
+(define (frontcover-position pic left top hcenter vcenter)
+  (values (cond [hcenter (+ (spinerightedge) (centering-offset pic (- (pagewidth) (bleed))))]
+                [else (+ (spinerightedge) left)])
+          (cond [vcenter (centering-offset pic (pageheight) pict-height)]
+                [else top])))
+
+(define (backcover-position pic left top hcenter vcenter)
+  (values (cond [hcenter (+ (bleed) (centering-offset pic (- (pagewidth) (bleed))))]
+                [else left])
+          (cond [vcenter (centering-offset pic (pageheight) pict-height)]
+                [else top])))
+
 (define (frontcover-draw pic
-                         #:top [y 0]
-                         #:left [x 0]
+                         #:top [top 0]
+                         #:left [left 0]
                          #:horiz-center? [hcenter #f]
                          #:vert-center? [vcenter #f])
-  (define top-offset
-    (cond [vcenter (centering-offset pic (pageheight) pict-height)]
-          [else y]))
-  (define left-offset
-    (cond [hcenter (+ (spinerightedge) (centering-offset pic (- (pagewidth) (bleed))))]
-          [else (+ (spinerightedge) x)]))
-
+  (define-values (left-offset top-offset) (frontcover-position pic left top hcenter vcenter))
   (draw-pict pic (current-cover-dc) left-offset top-offset))
-  
+
 (define (backcover-draw pic
-                        #:top [x 0]
-                        #:left [y 0]
+                        #:top [top 0]
+                        #:left [left 0]
                         #:horiz-center? [hcenter #f]
                         #:vert-center? [vcenter #f])
-  (define top-offset
-    (cond [vcenter (centering-offset pic (pageheight) pict-height)]
-          [else y]))
-  (define left-offset
-    (cond [hcenter (+ (bleed) (centering-offset pic (- (pagewidth) (bleed))))]
-          [else x]))
-  
+  (define-values (left-offset top-offset) (backcover-position pic left top hcenter vcenter))
   (draw-pict pic (current-cover-dc) left-offset top-offset))
 
 (define (cover-draw pic x y)
@@ -398,9 +400,23 @@
   (check-equal? 25.0 (spinewidth))
   (check-equal? 407.5 (spinerightedge))
   (check-equal? 22.5 (bleed))
+  ;; regression: #:left moves horizontally and #:top moves vertically, on both covers
+  ;; (backcover-draw once had the two keywords swapped)
+  (let ([dot (circle 10)])
+    (let-values ([(x y) (backcover-position dot 30 40 #f #f)])
+      (check-equal? (list 30 40) (list x y)))
+    (let-values ([(x y) (frontcover-position dot 30 40 #f #f)])
+      (check-equal? (list (+ 407.5 30) 40) (list x y)))
+    ;; centering: pict center lands on the center of the trim area
+    (let-values ([(x y) (backcover-position dot 30 40 #t #t)])
+      (check-equal? (list 197.5 287.5) (list x y)))
+    (let-values ([(x y) (frontcover-position dot 30 40 #t #t)])
+      (check-equal? (list 582.5 287.5) (list x y))))
   (check-equal? (void) (frontcover-draw (text "front:0,0")))
+  (check-equal? (void) (frontcover-draw (text "front:30,40") #:left 30 #:top 40))
   (check-equal? (void) (frontcover-draw (text "Front and Center") #:horiz-center? #t #:vert-center? #t))
   (check-equal? (void) (backcover-draw (text "back:0,0")))
+  (check-equal? (void) (backcover-draw (text "back:30,40") #:left 30 #:top 40))
   (check-equal? (void) (backcover-draw (text "Back and Center") #:horiz-center? #t #:vert-center? #t))
   (check-equal? (void) (spine-draw (text "x")))
   (check-equal? (void) (outline-spine!))
