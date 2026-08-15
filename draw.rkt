@@ -139,7 +139,8 @@
 (define current-spinewidth-pts (make-parameter 0))
 (define current-coverwidth-pts (make-parameter 0))
 (define current-interior-pagecount (make-parameter 0))
-(define current-scaling (make-parameter 0))
+(define current-scaling-x (make-parameter 0))
+(define current-scaling-y (make-parameter 0))
 
 ; some derived values
 (define (current-spineleftedge-pts) (current-pagewidth-pts))
@@ -152,7 +153,8 @@
         current-spinewidth-pts
         current-coverwidth-pts
         current-interior-pagecount
-        current-scaling))
+        current-scaling-x
+        current-scaling-y))
 
 (define (reset-numeric-parameters)
   (for ([param (in-list all-numeric-parameters)])
@@ -162,18 +164,21 @@
   (define x (box 0))
   (define y (box 0))
   (send (current-ps-setup) get-scaling x y)
-  (current-scaling (unbox x)))
+  (current-scaling-x (unbox x))
+  (current-scaling-y (unbox y)))
 
 ;; ~~~ Measurement Functions ~~~
 
-(define (bleed) (/ (current-bleed-pts) (current-scaling)))
-(define (pagewidth) (/ (current-pagewidth-pts) (current-scaling)))
-(define (pageheight) (/ (current-pageheight-pts) (current-scaling)))
+;; Horizontal measurements are scaled by the x factor, vertical ones by the y factor.
+(define (bleed) (/ (current-bleed-pts) (current-scaling-x)))
+(define (vertical-bleed) (/ (current-bleed-pts) (current-scaling-y))) ; not provided
+(define (pagewidth) (/ (current-pagewidth-pts) (current-scaling-x)))
+(define (pageheight) (/ (current-pageheight-pts) (current-scaling-y)))
 (define coverheight pageheight)
-(define (spinewidth) (/ (current-spinewidth-pts) (current-scaling)))
-(define (coverwidth) (/ (current-coverwidth-pts) (current-scaling)))
-(define (spineleftedge) (/ (current-spineleftedge-pts) (current-scaling)))
-(define (spinerightedge) (/ (current-spinerightedge-pts) (current-scaling)))
+(define (spinewidth) (/ (current-spinewidth-pts) (current-scaling-x)))
+(define (coverwidth) (/ (current-coverwidth-pts) (current-scaling-x)))
+(define (spineleftedge) (/ (current-spineleftedge-pts) (current-scaling-x)))
+(define (spinerightedge) (/ (current-spinerightedge-pts) (current-scaling-x)))
 
 
 ;; ~~~ Unit conversions ~~~
@@ -287,11 +292,11 @@
   (draw-pict spineline (current-cover-dc) (spinerightedge) 0))
 
 (define (outline-bleed! [linecolor "black"])
-  (define rect (rectangle (- (coverwidth) (* 2 (bleed))) (- (pageheight) (* 2 (bleed)))))
+  (define rect (rectangle (- (coverwidth) (* 2 (bleed))) (- (pageheight) (* 2 (vertical-bleed)))))
   (draw-pict (linewidth 0.2 (linestyle 'dot (colorize rect linecolor)))
              (current-cover-dc)
              (bleed)
-             (bleed)))
+             (vertical-bleed)))
 
 ;; ~~~ Testing/Diagnostics ~~~
 
@@ -361,7 +366,7 @@
           (current-pageheight-pts)
           (rounder (coverwidth))
           (rounder (pageheight)))
-  (printf "Scaling factor:       ~a\n" (current-scaling))
+  (printf "Scaling factor:       ~a ⨉ ~a\n" (current-scaling-x) (current-scaling-y))
   (printf "Bleed:                ~a (~a)\n" (unit-func (current-bleed-pts)) (bleed))
   (printf "Interior PDF size:    ~a ⨉ ~a\n" interior-pagewidth-pts interior-pageheight-pts)
   (printf "Interior pagecount:   ~a pages\n" (current-interior-pagecount))
@@ -425,3 +430,26 @@
   (check-equal? (void) (finish-cover))
   (delete-file "test-cover.pdf")
   (delete-file "test-interior.pdf"))
+
+(module+ test
+  ;; When the x and y scaling factors differ, horizontal measurements must use the
+  ;; x factor and vertical ones the y factor.
+  (define asym-setup (new ps-setup%))
+  (send asym-setup set-scaling 1.0 0.5)
+  (parameterize ([current-ps-setup asym-setup])
+    (dummy-pdf "test-interior-asym.pdf" (inches->pts 4) (inches->pts 6) #:pages 100)
+    (setup #:interior-pdf "test-interior-asym.pdf"
+           #:cover-pdf "test-cover-asym.pdf"
+           #:bleed-pts (inches->pts 0.25)
+           #:spine-calculator (using-ppi 360))
+    (check-equal? 632.0 (coverwidth))       ; 632pts ÷ 1.0
+    (check-equal? 306.0 (pagewidth))        ; 306pts ÷ 1.0
+    (check-equal? 20.0 (spinewidth))        ; 20pts ÷ 1.0
+    (check-equal? 326.0 (spinerightedge))
+    (check-equal? 18.0 (bleed))             ; 18pts ÷ 1.0
+    (check-equal? 936.0 (pageheight))       ; 468pts ÷ 0.5
+    (check-equal? 36.0 (vertical-bleed))    ; 18pts ÷ 0.5
+    (check-equal? (void) (outline-bleed!))
+    (check-equal? (void) (finish-cover)))
+  (delete-file "test-cover-asym.pdf")
+  (delete-file "test-interior-asym.pdf"))
