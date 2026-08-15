@@ -232,7 +232,8 @@
     (reset-numeric-parameters)
     (send* (current-cover-dc)
       (end-page)
-      (end-doc))))
+      (end-doc))
+    (current-cover-dc null)))
 
 ;; ~~~ Drawing functions ~~~
 
