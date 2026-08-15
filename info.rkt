@@ -1,7 +1,7 @@
 #lang info
 
 (define collection "bookcover")
-(define version "1.0")
+(define version "1.1")
 (define scribblings '(("scribblings/bookcover.scrbl" (multi-page))))
 (define deps '("base"
                "draw-lib"

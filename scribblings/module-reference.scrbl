@@ -22,7 +22,7 @@ your own functions that create multiple book covers of the same style for differ
 @defproc[(setup [#:interior-pdf interior-pdf path-string?]
                 [#:cover-pdf cover-pdf-filename path-string?]
                 [#:bleed-pts bleed-pts real? (* 0.125 72)]
-                [#:spine-calculator spinewidth-calc (exact-positive-integer? . -> . real?) (createspace-spine 'white-bw)])
+                [#:spine-calculator spinewidth-calc (exact-positive-integer? . -> . real?) (amazonkdp-spine 'white-bw)])
          void?]{
 
 Calculate the size of the book cover that would properly fit an existing PDF file
@@ -91,27 +91,40 @@ This @deftech{spine width calculator} is any function that takes a page count (a
 and returns a value in @tech{points}.
 
 You may pass any such function to the @racket[#:spine-calculator] argument of @racket[setup]; if you
-choose not to, @racket[setup] will default to the function returned by @racket[(createspace-spine
-'white-bw)] --- that is, it will assume you are having your book printed by Createspace, on their
-white paper, in black and white.
+choose not to, @racket[setup] will default to the function returned by @racket[(amazonkdp-spine
+'white-bw)] --- that is, it will assume you are having your book printed by Amazon KDP (née
+Createspace), on their white paper, in black and white.
 
 Different printers specify different ways of calculating the spine width of your book. As a
 convenience, this module provides some functions which return ready-made @tech{spine width
 calculators} that cover the most common cases, but you can also supply your own.
 
-@defproc[(createspace-spine [paper-type (or/c 'white-bw 'cream-bw 'color)])
+@defproc[(amazonkdp-spine [paper-type (or/c 'white-bw 'cream-bw 'color 'color-std)])
          (exact-positive-integer? . -> . real?)]{
 
-Returns a @tech{spine width calculator} function that uses the constants provided by Createspace for
-their different paper types: @racket[0.002252] for black-and-white printing on white paper,
-@racket[0.0025] for black-and-white printing on cream paper, and @racket[0.002347] for color
-printing.
+Returns a @tech{spine width calculator} function that uses the
+@hyperlink["https://kdp.amazon.com/en_US/help/topic/G201953020#size"]{constants provided by Amazon
+KDP} for their different paper types:
+
+@tabular[#:sep @hspace[3]
+         #:row-properties '(bottom-border ())
+         (list (list @bold{Symbol}          @bold{Paper type}                    @bold{Inches per page})
+               (list @racket['white-bw]     "White paper, black-and-white ink"   @racket[0.002252])
+               (list @racket['cream-bw]     "Cream paper, black-and-white ink"   @racket[0.0025])
+               (list @racket['color]        "Premium Color paper"                @racket[0.002347])
+               (list @racket['color-std]    "Standard Color paper"               @racket[0.002252]))]
 
 @examples[#:eval codebox
-          (define spine-func (createspace-spine 'cream-bw))
+          (define spine-func (amazonkdp-spine 'cream-bw))
           (spine-func 330)
           ]
+
+@history[#:changed "1.1" @elem{Renamed from @racket[createspace-spine] and added @racket['color-std]
+option.}]
+
 }
+
+@defthing[createspace-spine procedure?]{Backwards-compatible alias for @racket[amazonkdp-spine].}
           
 @defproc[(using-ppi [pages-per-inch real?])
          (exact-positive-integer? . -> . real?)]{
@@ -286,6 +299,10 @@ the documentation for @racket[check-cover] for an example.
 
 Prints out a bunch of information about the current bleed, interior PDF page size, spine width
 calculation and cover size. Dimensions are formatted using @racket[unit-func].
+
+The last line printed is a note about spine text, reflecting Amazon KDP's guidance: KDP only prints
+spine text on books with more than 79 pages, and requires at least 0.0625″ (1.6 mm) of space
+between the text and each edge of the spine.
 
 @examples[#:eval codebox
 (dummy-pdf "my-book.pdf" (inches->pts 4) (inches->pts 6) #:pages 100)

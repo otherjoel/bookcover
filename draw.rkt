@@ -25,7 +25,8 @@
 
 (provide
  (contract-out
-  [createspace-spine ((or/c 'white-bw 'cream-bw 'color) . -> . (exact-positive-integer? . -> . real?))]
+  [createspace-spine ((or/c 'white-bw 'cream-bw 'color 'color-std) . -> . (exact-positive-integer? . -> . real?))]
+  [amazonkdp-spine   ((or/c 'white-bw 'cream-bw 'color 'color-std) . -> . (exact-positive-integer? . -> . real?))]
   [using-ppi         (real?                             . -> . (exact-positive-integer? . -> . real?))]))
 
 (provide
@@ -97,25 +98,32 @@
 
 ;; ~~~ Spine width multipliers ~~~
 
-(define (createspace-spine paper-type)
+(define (amazonkdp-spine paper-type)
   (define spine-multipliers
     (hash 'white-bw 0.002252
           'cream-bw 0.002500
-          'color    0.002347))
+          'color    0.002347
+          'color-std 0.002252))
   (cond [(member paper-type (hash-keys spine-multipliers))
          (lambda (pages) (* pages (hash-ref spine-multipliers paper-type) 72.0))]
         [else
          (raise-argument-error 'paper-type (format "one of: ~a" (hash-keys spine-multipliers)) paper-type)]))
+
+;; Backwards compatibility
+(define createspace-spine amazonkdp-spine)
          
 (define (using-ppi pages-per-inch)
   (lambda (pages) (* pages (/ 1 pages-per-inch) 72.0)))
 
 (module+ test
-  (check-equal? 16.2144 ((createspace-spine 'white-bw) 100))
-  (check-equal? 18.0 ((createspace-spine 'cream-bw) 100))
-  (check-equal? 16.729416 ((createspace-spine 'color) 99))
+  ;; Expected values: page count × KDP's published inches-per-page multiplier × 72
+  (check-equal? 16.2144 ((amazonkdp-spine 'white-bw) 100))     ; white paper, b&w
+  (check-equal? 18.0 ((amazonkdp-spine 'cream-bw) 100))        ; cream paper, b&w
+  (check-equal? 16.729416 ((amazonkdp-spine 'color) 99))       ; premium color
+  (check-equal? 16.2144 ((amazonkdp-spine 'color-std) 100))    ; standard color
+  (check-eq? createspace-spine amazonkdp-spine)
   (check-exn exn:fail:contract?
-             (lambda () (createspace-spine 'glitterbomb)))
+             (lambda () (amazonkdp-spine 'glitterbomb)))
 
   (check-equal? 25.0 ((using-ppi 288) 100)))
 
@@ -323,6 +331,21 @@
     (end-page)
     (end-doc)))
 
+;; Amazon KDP prints spine text only on books with more than 79 pages, and requires
+;; at least 0.0625″ (1.6 mm) between the text and each edge of the spine.
+(define kdp-spine-text-min-pages 80)
+(define kdp-spine-text-clearance-pts (* 0.0625 72))
+
+(define (spine-text-note pagecount spinewidth-pts [unit-func pts->inches-string])
+  (define max-text-width-pts (- spinewidth-pts (* 2 kdp-spine-text-clearance-pts)))
+  (cond [(< pagecount kdp-spine-text-min-pages)
+         (format "Amazon KDP will not print text on the spine (pages < ~a)" kdp-spine-text-min-pages)]
+        [(not (positive? max-text-width-pts))
+         "Spine is too narrow for text (Amazon KDP requires 0.0625″ between spine text and each edge of the spine)"]
+        [else
+         (format "Spine text must fit within ~a (0.0625″ clearance between text and each edge of the spine)"
+                 (unit-func max-text-width-pts))]))
+
 (define (check-cover #:unit-display [unit-func pts->inches-string])
   (define interior-pagewidth-pts (unit-func (- (current-pagewidth-pts) (current-bleed-pts))))
   (define interior-pageheight-pts (unit-func (- (current-pageheight-pts) (* 2 (current-bleed-pts)))))
@@ -345,11 +368,20 @@
           (current-interior-pagecount)
           ((current-spinewidth-calculator) 1)
           (current-spinewidth-pts))
-  
-  (cond [(< (current-interior-pagecount) 101)
-         (printf "CreateSpace would not allow text on spine (pages < 101)\n")]
-        [(< (current-interior-pagecount) 130)
-         (printf "CreateSpace does not recommend text on spine (pages < 130)\n")]))
+
+  (printf "~a\n" (spine-text-note (current-interior-pagecount)
+                                  (current-spinewidth-pts)
+                                  unit-func)))
+
+(module+ test
+  (check-regexp-match #rx"will not print" (spine-text-note 79 ((amazonkdp-spine 'white-bw) 79)))
+  ;; 100pp white paper: 16.2144pts spine − (2 × 4.5pts) clearance = 7.2144pts ≈ 0.1″
+  (check-equal? "Spine text must fit within 0.1″ (0.0625″ clearance between text and each edge of the spine)"
+                (spine-text-note 100 ((amazonkdp-spine 'white-bw) 100)))
+  (check-regexp-match #rx"must fit within.*cm"
+                      (spine-text-note 80 ((amazonkdp-spine 'white-bw) 80) pts->cm-string))
+  ;; a custom spine calculator can produce a spine too narrow for any text
+  (check-regexp-match #rx"too narrow" (spine-text-note 100 ((using-ppi 900) 100))))
 
 (module+ test
   (check-equal? (void) (dummy-pdf "test-interior.pdf" (inches->pts 4) (inches->pts 6) #:pages 100))
